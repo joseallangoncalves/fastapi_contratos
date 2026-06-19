@@ -1,0 +1,52 @@
+RELATÓRIO DE PENALIDADES E RISCOS CONTRATUAIS
+═══════════════════════════════════════════════════════════════
+
+OPORTUNIDADE: 7004166210
+CONTRATADA: TECNO SERVICE LOCAÇÃO, COMÉRCIO E SERVIÇOS LTDA - EPP
+CNPJ: 04.605.026/0001-54
+
+VIGÊNCIA
+───────────────────────────────────────────────────────────────
+Início: 21 de janeiro de 2025
+Término: 20 de janeiro de 2027
+Duração: 24 meses (2 anos)
+
+VALOR DO CONTRATO
+───────────────────────────────────────────────────────────────
+Valor mensal: R$ 29.900,00
+Valor total: R$ 717.600,00
+
+MULTAS E PENALIDADES
+───────────────────────────────────────────────────────────────
+TIPO                          | PERCENTUAL | CONDIÇÃO
+──────────────────────────────|────────────|────────────────────
+Multa por atraso de pagamento| 2%         | Sobre valor inadimplente
+Juros de mora                | 1% ao mês  | Após vencimento
+Correção monetária           | IPCA-E     | Após vencimento
+
+SANÇÕES ADMINISTRATIVAS (Art. 7º da Lei 10.520/02)
+───────────────────────────────────────────────────────────────
+• Advertência
+• Multa
+• Suspensão de participação em licitações
+• Declaração de idoneidade para licitar
+
+RESCISÃO
+───────────────────────────────────────────────────────────────
+• Por iniciativa da Contratante em caso de descumprimento de obrigações contratuais ou técnicas
+• Por acordo entre as partes, mediante autorização judicial
+
+CONDIÇÕES DE IMPACTO
+───────────────────────────────────────────────────────────────
+Base de cálculo das penalidades: Valor do contrato/parcela inadimplente
+Índice de correção: IPCA-E (Índice de Preços ao Consumidor Amplo Especial)
+
+RISCO IDENTIFICADO
+───────────────────────────────────────────────────────────────
+Nível: MÉDIO
+Atrasos no pagamento podem gerar cobrança de juros + multa + correção monetária.
+
+═══════════════════════════════════════════════════════════════
+Relatório gerado em: 07/04/2026
+Skill: analisador-contratual
+═══════════════════════════════════════════════════════════════

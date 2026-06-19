@@ -1,0 +1,109 @@
+# RELATÓRIO DE ANÁLISE DE SMS
+
+## 1. Informações Gerais
+- **Nome do Documento**: Anexo 03 - SMS.pdf
+- **Data de Extração**: 07/04/2026
+- **Número do Contrato/Oportunidade**: 7004166210
+- **Lote**: 2
+
+## 2. Resumo Executivo
+
+Este documento estabelece os requisitos de Segurança, Saúde e Meio Ambiente (SMS) para a execução dos serviços de manutenção preventiva e corretiva de sistemas de ar condicionado, central de água gelada, sistema de ventilação e exaustão mecânica, e sistema de combate a incêndio (pressurização de escadas). O escopo abrange desde a elaboração de documentação técnica até a execução dos serviços com entrega técnica, incluindo todas as obligaciones de SMS exigidas pela Contratante.
+
+## 3. Pontos Relevantes para a Contratada
+
+### 3.1 EPIs e Equipamentos de Proteção
+- **Ferramentas adequadas e em perfeito estado** para cada tipo de serviço
+- **Equipamentos de proteção individual** (EPIs) conforme NR-6
+- **Equipamentos de proteção coletiva** (EPCs) quando aplicável
+- **Uniforme completo** com identificação da empresa (inclusive EPIs para trabalho a quente)
+- **Todos os EPIs devem ser de uso individual** e não podem ser compartilhados
+
+### 3.2 Certificações e Treinamentos
+- **NR-10** - Segurança em Instalações Elétricas (quando aplicável)
+- **NR-35** - Trabalho em Altura (quando aplicável)
+- **NR-18** - Condições e Meio Ambiente de Trabalho na Indústria da Construção (quando aplicável)
+- **Treinamento de Segurança** para todos os colaboradores antes do início dos serviços
+- **Treinamento de Primeiros Socorros** com no mínimo um membro da equipe capacitado
+- **Treinamento de Combate a Incêndio** para todos os colaboradores
+
+### 3.3 Procedimentos de Emergência
+- Elaborar **Plano de Ação de Emergência** para as atividades desenvolvidas
+- Comunicar imediatamente à Contratante qualquer **acidente ou incidente** durante a execução dos serviços
+- Disponibilizar **kit de primeiros socorros** nos veículos de transporte
+- Manter **telefones de emergência** afixados em local visível
+- Em caso de acidentes com vítimas, **acionar o SAMU (192)** imediatamente
+
+### 3.4 Requisitos Ambientais
+- **Gestão de Resíduos**: A Contratada é responsável pela segregação, coleta, transporte e destinação final adequada de todos os resíduos gerados
+- **Resíduos perigosos** (óleos, graxas, filtros, refrigerantes): Destinação por empresa licenciada
+- **Resíduos não perigosos**: Destinação adequada conforme características
+- **Proibido** o descarte de resíduos no meio ambiente ou em locais não autorizados
+
+### 3.5 Obrigações de Registro e Comunicação
+- **Comunicar imediatamente** qualquer acidente ou incidente à Contratante
+- **Registrar e comunicar** todas as ocorrências anormais durante a execução dos serviços
+- **Manter documentação** de treinamentos e certificações dos colaboradores
+- **Responsabilidade integral** pela saúde e segurança de seus colaboradores
+
+## 4. Pontos Relevantes para a Contratante
+
+### 4.1 Obrigações de Fiscalização
+- **Fiscalização técnica** dos serviços executados
+- **Acompanhamento** do cumprimento das normas de SMS
+- **Verificação** da documentação de treinamentos e certificações
+
+### 4.2 Requisitos de Comunicação
+- Receber **comunicação imediata** de acidentes e incidentes
+- Acompanhar a **gestão de resíduos** realizada pela Contratada
+
+### 4.3 Responsabilidades por Medicina do Trabalho
+- A Contratante é **responsável pela medicina do trabalho** vinculada ao contrato
+- A Contratada deve **comunicar imediatamente** qualquer ocorrência de acidente de trabalho
+
+## 5. Tabela de Responsabilidades Cruzadas
+
+| Requisito | Contratada | Contratante |
+|-----------|------------|-------------|
+| EPI conforme NR-6 | X | - |
+| Treinamento de Segurança | X | - |
+| Treinamento de Primeiros Socorros | X | - |
+| Treinamento de Combate a Incêndio | X | - |
+| NR-10 (quando aplicável) | X | - |
+| NR-35 (quando aplicável) | X | - |
+| NR-18 (quando aplicável) | X | - |
+| Plano de Ação de Emergência | X | - |
+| Comunicação de acidentes/incidentes | X | X |
+| Gestão de resíduos | X | - |
+| Fiscalização técnica | - | X |
+| Medicina do trabalho | - | X |
+
+## 6. Riscos e Pontos de Atenção
+
+1. **Trabalhos em altura** (NR-35): Serviços em towers, unidades condensadoras e evaporadoras em altura requerem certificação específica
+2. **Instalações elétricas** (NR-10): Manutenção de sistemas de ar condicionado envolve trabalhos elétricos que exigem competência
+3. **Trabalho a quente**: Serviços que envolvam soldagem ou corte requerem EPIs específicos e permissão de trabalho
+4. **Resíduos perigosos**: Óleos, graxas, filtros e refrigerantes devem ter destinação por empresa licenciada
+5. **Responsabilidade solidária**: A Contratante responde subsidiariamente em caso de inadimplemento da Contratada quanto às obrigações trabalhistas e de SMS
+6. **Auditoria técnica**: A Contratante pode realizar auditorias para verificar o cumprimento das normas de SMS
+
+## 7. Recomendações
+
+### Para a Contratada:
+- Manter registros atualizados de todos os treinamentos e certificações
+- Disponibilizar KIT de primeiros socorros em todos os veículos
+- Elaborar e manter Plano de Ação de Emergência específico para os serviços
+- Contratar empresa licenciada para destinação de resíduos perigosos
+- Comunicar imediatamente qualquer incidente ou acidente à Contratante
+
+### Para a Contratante:
+- Verificar a documentação de treinamentos e certificações antes do início dos serviços
+- Manter registro de comunicação de ocorrências
+- Realizar fiscalização periódica do cumprimento das normas de SMS
+- Verificar a destinação adequada dos resíduos gerados
+
+---
+
+*Relatório gerado em 07/04/2026*
+*Arquivo: Anexo 03 - SMS.pdf*
+*Contrato: 7004166210 - Lote 2*

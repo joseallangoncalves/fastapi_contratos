@@ -1,0 +1,69 @@
+Trabalho final da disciplina de Construção de APIs para Inteligência Artificial 
+ 
+Objetivo 
+Desenvolver uma API funcional que disponibilize pelo menos dois serviços (endpoints) de 
+Inteligência Artificial (IA), demonstrando na prática todos os conceitos aprendidos ao longo 
+da disciplina: boas práticas de desenvolvimento, versionamento, autenticação, 
+documentação, logs, tratamento de erros, entre outros. 
+ 
+Orientações 
+1.​ Pode ser feito de forma individual ou em grupo de até 5 pessoas 
+2.​ Serviço de IA 
+a.​ Pode ser escolhido qualquer serviço de IA, como classificação, uso de LLM, 
+uso de agentes, entre outros 
+b.​ Deverá ter pelo menos 2 serviços que realizem operações diferentes 
+i.​
+Não pode ser o mesmo que criamos durante a aula (gerar história) 
+c.​ Desejável utilizar algo relacionado a uma situação real, como uma demanda 
+do trabalho 
+3.​ Framework de desenvolvimento 
+a.​ Pode ser utilizado o framework/ferramenta de preferência 
+b.​ Sugestão: FastAPI ou Django 
+4.​ Requisitos básicos 
+a.​ Validação de dados 
+b.​ Tratamento de erros 
+c.​ Logs 
+d.​ Segurança 
+e.​ Versionamento 
+ 
+Entregáveis 
+1.​ Repositório no GitHub com código fonte 
+a.​ Deverá ter todos os arquivos e orientações necessárias para executar a API 
+b.​ Repositório público 
+i.​
+Excepcionalmente pode ser enviado em outra abordagem 
+ii.​
+Se for repositório privado no github, compartilha acesso 
+(temporariamente): https://github.com/rogerior  
+2.​ Apresentação 
+a.​ Apresentação técnica simulando apresentação para equipe técnica de uma 
+instituição 
+b.​ Demonstração funcional 
+c.​ Demonstração das características técnicas da solução 
+d.​ Vídeo de até 10 minutos 
+ 
+Critérios de avaliação 
+1.​ Funcionalidade de IA 
+a.​ Se tem pelo menos dois serviços (endpoints) que realizem operações de IA 
+b.​ Se os endpoints funcionam corretamente, com dados válidos e inválidos 
+c.​ Se o código executa em outro computador (de outro desenvolvedor) 
+2.​ Qualidade do código e documentação 
+3.​ Requisitos básicos 
+
+4.​ Apresentação 
+ 
+Datas 
+1.​ Entrega do código fonte e apresentação, via SIGAA 
+a.​ Enviar link do repositório (github) e da apresentação (tem que estar em um 
+serviço online e de acesso público) 
+b.​ 30/06/2026 
+ 
+Observações 
+1.​ Não é necessário criar um modelo de IA super complexo ou algum serviço super 
+complexo, pode ser pensado um escopo realista 
+2.​ Realize diversos testes simulando diversos cenários 
+ 
+Dúvidas 
+1.​ rogerior@ufg.br 
+2.​ 62986058772 
+ 

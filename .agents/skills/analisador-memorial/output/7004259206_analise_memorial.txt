@@ -1,0 +1,174 @@
+================================================================================
+ANÁLISE DE MEMORIAL DESCRITIVO E ESPECIFICAÇÕES TÉCNICAS
+================================================================================
+
+NÚMERO DA OPORTUNIDADE: 7004259206
+DOCUMENTO: Anexo 1 - Especificação dos Serviços (MD) - Rev. B
+TIPO: Poço de Água Subterrânea - Sistema de Captação
+ÁREA: UN-SE/BA-1223 - Petrobrás
+
+================================================================================
+1. RESUMO TÉCNICO DO OBJETO
+================================================================================
+
+OBJETO: Construção de Poço de Água Subterrânea (Tubular Profundo) para
+capttação de água potável no Estado da Bahia.
+
+CARACTERÍSTICAS PRINCIPAIS:
+- Profundidade estimada: 120 metros
+- Diâmetro de perfuração: 12 1/4"
+- Diâmetro do revestimento (casing): 6"
+- Utilização: Abastecimento humano e industrial
+- Localização: Estado da Bahia
+
+MÉTODO DE EXECUÇÃO:
+- Perfuração rotativa com circulação de fluido (sistema lama)
+- Sistema de completação com filtros (tela filter wire)
+- Desenvolvimento do poço por meio de air-lift e/ou pistonagem
+
+================================================================================
+2. ESPECIFICAÇÕES TÉCNICAS E NORMAS APLICÁVEIS
+================================================================================
+
+NORMAS TÉCNICAS APLICÁVEIS:
+
+--- ABNT ---
+- NBR 12212: Poço profundo - Terminologia
+- NBR 12214: Projeto de poço profundo para abastecimento de água
+- NBR 12215: Poço profundo - Captação de água subterrânea
+- NBR 12216: Poço profundo - Hidrogeologia
+- NBR 13919: Poço profundo - Escopo de fornecimento do poço
+- NBR 15527: Poço profundo - Determinação da vazão específica
+
+--- PETROBRAS ---
+- N-2016: Especificação de materiais e equipamentos
+- N-2022: Soldagem e inspeção de soldagem
+- N-2036: Pintura - Esquema de pintura em atmosferas marítimas
+- N-2090: Revestimento de poços tubulares profundos
+- N-2157: Filtro de cascalho ( gravel pack ) para poços de água
+- PET-2003D1: Teste de acceptance de fluido de perfuração
+
+EQUIPAMENTOS E MATERIAIS:
+
+Revestimento (Casing):
+- Material: Aço-carbono ASTM A53 Grau B ou API 5L Grau B
+- Diâmetro nominal: 6"
+- Espessura: SCH 40 (paredes thicker)
+- Conexões: Rosca API BTC (buttress thread coupling)
+- Revestimento interno: Primer epóxi e revestimento epóxi fundido
+
+Filtros (Screens):
+- Tipo: Tela armada (filter wire)
+- Abertura: Furo de 1,0 mm (slot 1,0) - conforme amostragem do aquífero
+- Material: Aço inoxidável AISI 304 ou 316L
+- Fluxo: Válvula de retenção (foot valve) no ponto mais baixo
+
+Elementos Filtrantes:
+- Material: Seixo rolado de silício (100% sílica)
+- Granulometria: Determinada por ensaio de granulometria do aquífero
+- Instalação: между filtros (interstitial)
+
+Outros:
+- Tubos de PVC para ventilação (quando especificado)
+- Caixa de proteção em concreto aparente
+- Tampa de aço galvanizado
+
+FLUIDOS DE PERFURAÇÃO:
+- Tipo: Sistema de lama bentonítica
+- Parâmetros: Densidade, viscosidade, pH, teor de areias
+- Descarte: Conforme resolução CONAMA 420/2009
+
+===============================================================================
+3. RESPONSABILIDADES DA CONTRATADA
+===============================================================================
+
+OBRIGAÇÕES OPERACIONAIS:
+
+A) PERFURAÇÃO E INSTALAÇÃO:
+- Fornecimento de todo material de consumo (fluidos,兵)
+- Execução da perfuração conforme diâmetro especificado
+- Instalação do revestimento (casing) e filtros (screens)
+- Fornecimento e instalação do elemento filtrante (seixo filtrante)
+- Desenvolvimento do poço (air-lift/pistonagem) até estabilização
+- Teste de vazão (vazão específica) antes da entrega
+
+B) DOCUMENTAÇÃO E REGISTROS:
+- Registro da stratigrafia (perfil litológico) durante perfuração
+- Coleta de amostras de solo/rocha a cada metro perfurado
+- Registro de perdas e ganhos de fluido
+- Relatório final com perfil do poço completo
+
+C) INFRAESTRUTURA DE PROTEÇÃO:
+- Construção de caixa de proteção em concreto aparente
+- Instalação de tampa de aço galvanizado
+- Instalação de PVC ventilação conforme projeto
+
+D) ENSAIOS E TESTES:
+- Ensaio de vazão específica (teste de aquífero)
+- Análise físico-química da água (parâmetros potabilidade)
+- Ensaio de granulometria para definição do filtro
+- Teste de acceptance do fluido de perfuração (PET-2003D1)
+
+E) MOBILIZAÇÃO E DESMOBILIZAÇÃO:
+- Mobilização de equipamento de perfuração completo
+- Desmobilização após conclusão e aceite
+
+F) DESCARTE E LIMPEZA:
+- Gerenciamento de resíduos conforme CONAMA 420/2009
+- Destinação adequada de cascalho e fluido gasto
+- Limpeza da área após conclusão dos serviços
+
+G) RESPONSÁVEL TÉCNICO:
+- Engenheiro de Poços ou Geólogo/Geohidrólogo com ART/CREA
+
+DOCUMENTAÇÃO EXIGIDA:
+- ART (Anotação de Responsabilidade Técnica) CREA
+- Registro de perfuração (log de sonda)
+- Relatório de ensaio de vazão
+- Análise de potabilidade da água
+- Certificados de materiais utilizados
+
+===============================================================================
+4. PRAZOS E MARCOS TÉCNICOS
+===============================================================================
+
+ETAPAS DE EXECUÇÃO:
+
+1. MOBILIZAÇÃO
+- Prazo: A definir conforme cronograma contratual
+- Atividades: Instalação de equipe e equipamentos
+
+2. PERFURAÇÃO
+- Prazo: Estima-se 15-20 dias úteis (variável conforme aquífero)
+- Marco: Atingimento da profundidade projetada
+
+3. INSTALAÇÃO DE REVESTIMENTO E FILTROS
+- Prazo: 2-3 dias após finalização da perfuração
+- Marco: Instalação completa do columnar
+
+4. DESENVOLVIMENTO DO POÇO
+- Prazo: 5-10 dias (air-lift/pistonagem)
+- Marco: Estabilização da vazão
+
+5. ENSAIO DE VAZÃO ESPECÍFICA
+- Prazo: 2-3 dias após desenvolvimento
+- Marco: Obtenção da vazão específica (L/s/m)
+
+6. ANÁLISE DE ÁGUA
+- Prazo: 5-10 dias (laboratório externo)
+- Marco: Laudo de potabilidade
+
+7. DESMOBILIZAÇÃO
+- Prazo: 1-2 dias após všech ensaios
+- Marco: Área limpa e liberada
+
+NOTAS:
+- Prazo total estimado: 30-45 dias (sujeito às condições do aquífero)
+- Marcos técnicos sujeitos a ajustes conforme condições geológicas
+- Interrupções podem ocorrer em caso de problemas mecânicos ou condições climáticas
+
+================================================================================
+FIM DO RELATÓRIO
+================================================================================
+Gerado em: 08/04/2026
+Skill: analisador-memorial

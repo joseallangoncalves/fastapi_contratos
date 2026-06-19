@@ -1,0 +1,77 @@
+# RELATÓRIO DE PENALIDADES E RISCOS CONTRATUAIS
+
+## Oportunidade: 7004259206
+
+### Vigência
+- **Início:** 29/07/2024
+- **Término:** 25/08/2027
+- **Duração:** 36 meses
+
+---
+
+## 1. MULTAS MORATÓRIAS
+
+| Tipo | Percentual | Condição | Incidência |
+|------|------------|----------|------------|
+| Atraso na execução dos serviços | 0,2% ao dia | Por dia de atraso nos marcos ou entrega final | Valor dos serviços atrasados |
+| Atraso na regularização após notificação | 0,2% ao dia | Após notificação para regularização | Valor do ITEM/serviço afetado |
+| **Limite global** | 10% | Por atraso, sobre o valor total do contrato | - |
+
+---
+
+## 2. MULTAS COMPENSATÓRIAS
+
+| Tipo | Percentual | Condição | Incidência |
+|------|------------|----------|------------|
+| Descumprimento parcial do objeto | 10% a 30% | Por ITEM/serviço não executado | Valor do ITEM não executado |
+| Descumprimento total do objeto | 30% | Não execução total do objeto contratual | Valor total do contrato |
+| Não conclusão dos serviços | 10% | Não conclusão após prazo final | Valor total do contrato |
+| Descumprimento de obrigações contratuais | 5% a 15% | Por obrigação não cumprida | Valor do serviço/ITEM afetado |
+
+---
+
+## 3. SANÇÕES ADMINISTRATIVAS
+
+| Sanção | Descrição | Prazo |
+|--------|-----------|-------|
+| Advertência | Por descumprimento de obrigação contratual | Imediato |
+| Multa | Por descumprimento conforme tabela acima | Conforme incidência |
+| Suspensão temporária | De participar de licitação e contratar com a Petrobras | 1 a 5 anos |
+| Declaração de inidoneidade | Para participar de licitação ou contratar com a Administração Pública | 1 a 5 anos |
+| Impedimento | Impedimento de contratar com a Petrobras | Até 5 anos |
+
+---
+
+## 4. RESCISÃO
+
+### Tipos de Rescisão aplicáveis:
+1. **Por acordo entre as partes** mediante aviso prévio de 60 dias
+2. **Por inadimplemento** de qualquer das partes
+3. **Por conveniência** da Contratante, mediante aviso prévio de 60 dias
+4. **De pleno direito** em caso de falência, recuperação judicial, dissolução ou liquidação da Contratada
+
+### Consequências da Rescisão por Inadimplemento:
+- Retenção de créditos tributários
+- Execução de garantia de execução
+- Suspensão de pagamentos devidos
+
+---
+
+## 5. BASE DE CÁLCULO DAS PENALIDADES
+
+- **Base moratória:** Valor dos serviços atrasados/dia
+- **Base compensatória:** Valor do ITEM não executado ou valor total do contrato
+- **Fator gerador:** Cada ITEM/serviço tem sua própria base de cálculo
+
+---
+
+## 6. OBSERVAÇÕES IMPORTANTES
+
+- As multas moratórias e compensatórias são cumulativas quando decorrentes de fatos distintos
+- O limite de 10% para multas moratórias é por evento, não cumulativo no período
+- A Contratada deve garantir que seus prepostos tenham conhecimento das penalidades
+- A aplicação de qualquer sanção não exclui a obrigação de reparação de danos
+
+---
+
+*Relatório gerado automaticamente via skill analisador-contratual*
