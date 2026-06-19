@@ -40,3 +40,7 @@ fastapi dev api\main.py
 
 A aplicação estará disponível em: http://localhost:8000
 A documentação interativa (Swagger UI) estará em: http://localhost:8000/docs
+
+
+username: johndoe
+password: secret
