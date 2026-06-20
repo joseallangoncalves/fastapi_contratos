@@ -19,4 +19,5 @@ dependencies = [
     "pymupdf>=1.27.2.3",
     "requests>=2.34.2",
     "ruff>=0.15.13",
+    "sqlalchemy>=2.0.51",
 ]

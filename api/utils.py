@@ -127,3 +127,78 @@ def execute_prompt(prompt: str, model: str = "gemini-2.5-flash", max_retries: in
     logger.error(f"Falha definitiva em todos os modelos após múltiplas tentativas.")
     return f"[ERRO NA ANÁLISE: Quota esgotada em todos os modelos disponíveis. Aguarde o reset da quota (meia-noite PST) ou ative o billing em https://aistudio.google.com/]"
 
+
+from typing import Type
+from pydantic import BaseModel
+from google.genai import types
+
+def execute_structured_prompt(
+    prompt: str,
+    schema: Type[BaseModel],
+    model: str = "gemini-2.5-flash",
+    max_retries: int = 5
+) -> dict:
+    """
+    Envia um prompt para o modelo LLM e força o retorno estruturado via JSON Schema.
+    Em caso de erro 429, tenta modelos alternativos via fallback.
+    Retorna o dicionário com os campos da resposta.
+    """
+    logger = get_logger()
+    logger.info(
+        f"Iniciando execução de prompt estruturado. Modelo: {model}. (Tamanho do prompt: {len(prompt)} caracteres)"
+    )
+
+    client = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+    models_to_try = [model] + [m for m in FALLBACK_MODELS if m != model]
+
+    for current_model in models_to_try:
+        logger.info(f"Tentando modelo estruturado: {current_model}")
+        for attempt in range(max_retries):
+            try:
+                response = client.models.generate_content(
+                    model=current_model,
+                    contents=prompt,
+                    config=types.GenerateContentConfig(
+                        response_mime_type="application/json",
+                        response_schema=schema,
+                    )
+                )
+
+                # response.text é uma string JSON válida
+                import json
+                try:
+                    resultado_dict = json.loads(response.text)
+                    return resultado_dict
+                except Exception as json_err:
+                    logger.error(f"Erro ao fazer parse do JSON retornado: {response.text} - {json_err}")
+                    raise json_err
+
+            except Exception as e:
+                error_str = str(e)
+                is_rate_limit = "429" in error_str or "RESOURCE_EXHAUSTED" in error_str
+                logger.warning(
+                    f"Erro na tentativa estruturada {attempt + 1}/{max_retries} com {current_model}: {e}"
+                )
+
+                if is_rate_limit:
+                    if "limit: 0" in error_str:
+                        logger.warning(
+                            f"Quota diária esgotada para {current_model}. Tentando próximo modelo estruturado..."
+                        )
+                        break
+
+                    suggested_delay = _extract_retry_delay(error_str)
+                    sleep_time = max(suggested_delay + 1, 5 * (attempt + 1))
+                else:
+                    sleep_time = 5 * (attempt + 1)
+
+                if attempt < max_retries - 1:
+                    logger.info(f"Aguardando {sleep_time:.1f}s antes do próximo retry estruturado...")
+                    time.sleep(sleep_time)
+        else:
+            continue
+
+    logger.error("Falha definitiva estruturada em todos os modelos.")
+    raise Exception("Não foi possível obter resposta estruturada do Gemini devido a limite de quota ou erro.")
+
+

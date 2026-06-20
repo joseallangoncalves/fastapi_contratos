@@ -7,6 +7,11 @@ from routers.contratos_router import router as contratos_router
 from fastapi_mcp import FastApiMCP
 
 
+from database import Base, engine
+import db_models
+
+Base.metadata.create_all(bind=engine)
+
 load_dotenv(find_dotenv())
 
 
@@ -17,9 +22,9 @@ app = FastAPI(
     version="0.1",
     terms_of_service="http://example.com/terms/",
     contact={
-        "name": "Rogério Rodrigues Carvalho",
-        "url": "http://github.com/rogerior/",
-        "email": "rogerior@ufg.br",
+        "name": "José Allan - Elson - PH - Geiziane",
+        "url": "https://github.com/joseallangoncalves/fastapi_contratos",
+        "email": "joseallan@ufg.br",
     },
     license_info={
         "name": "Apache 2.0",
