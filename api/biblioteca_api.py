@@ -1,149 +1,153 @@
 """
-Biblioteca Python para a API Aula - Construção de APIs para IA.
+Biblioteca Python para a API de Análise de Contratos.
 
-Encapsula todos os endpoints definidos no openapi.json, oferecendo uma
-interface simples e intuitiva sem expor detalhes internos da API.
+Encapsula todos os endpoints definidos na API de análise de contratos,
+permitindo realizar análises contratuais, extrair obrigações de SMS e
+gerar checklists de verificação.
 
 Exemplo de uso::
 
     from biblioteca_api import BibliotecaAPI
 
-    api = BibliotecaAPI(base_url="http://localhost:8000", api_token="meu-token")
+    # Inicializa o cliente
+    api = BibliotecaAPI(base_url="http://localhost:8000")
 
-    # Gerar uma história
-    resultado = api.gerar_historia(tema="aventura no espaço")
+    # Faz o login para obter o token JWT
+    api.login(username="johndoe", password="secret")
 
-    # Realizar uma operação matemática
-    resultado = api.operacao_matematica(operacao="soma", numero1=10, numero2=5)
+    # Envia um contrato para análise
+    resultado = api.analise_contratual("caminho/para/contrato.pdf")
+    print(resultado["analise"])
 """
 
-import warnings
-
 import requests
+from typing import Dict, Any, List
 
 
 class BibliotecaAPI:
     """
-    Cliente Python para a API Aula.
+    Cliente Python para a API de Análise de Contratos.
 
     Args:
         base_url: URL base da API (ex: ``"http://localhost:8000"``).
-        api_token: Token de autenticação exigido por todos os endpoints.
     """
 
-    def __init__(self, base_url: str, api_token: str) -> None:
+    def __init__(self, base_url: str) -> None:
         self.base_url = base_url.rstrip("/")
-        self.api_token = api_token
+        self.token: str | None = None
         self._session = requests.Session()
 
-    # ------------------------------------------------------------------
-    # Helpers internos
-    # ------------------------------------------------------------------
+    def login(self, username: str, password: str) -> str:
+        """Autentica na API e armazena o token JWT.
 
-    def _post(
-        self, path: str, params: dict | None = None, json: dict | None = None
-    ) -> dict:
-        params = params or {}
-        params["api_token"] = self.api_token
+        Args:
+            username: Nome de usuário.
+            password: Senha de acesso.
+
+        Returns:
+            O token JWT gerado.
+        """
         response = self._session.post(
-            f"{self.base_url}{path}", params=params, json=json
+            f"{self.base_url}/api/v1/token",
+            data={"username": username, "password": password}
         )
+        response.raise_for_status()
+        data = response.json()
+        self.token = data["access_token"]
+        return self.token
+
+    def _get_headers(self) -> dict:
+        headers = {}
+        if self.token:
+            headers["Authorization"] = f"Bearer {self.token}"
+        return headers
+
+    def _post_file(self, path: str, file_path: str) -> dict:
+        headers = self._get_headers()
+        with open(file_path, "rb") as f:
+            files = {"file": (file_path, f, "application/pdf")}
+            response = self._session.post(
+                f"{self.base_url}{path}", headers=headers, files=files
+            )
         response.raise_for_status()
         return response.json()
 
     # ------------------------------------------------------------------
-    # IA
+    # Endpoints de IA (Análise de Contratos)
     # ------------------------------------------------------------------
 
-    def gerar_historia(self, tema: str) -> dict:
-        """Gera uma história com base em um tema usando IA.
+    def analise_contratual(self, file_path: str) -> dict:
+        """Envia um contrato em PDF para analisar multas, penalidades e vigência.
 
         Args:
-            tema: O tema da história a ser gerada.
+            file_path: Caminho local para o arquivo PDF do contrato.
 
         Returns:
-            Resposta da API com a história gerada.
+            Resposta da API com o ID da análise, relatório markdown e dados salvos.
         """
-        return self._post("/gerar_historia/v1", json={"tema": tema})["historia"]
+        return self._post_file("/api/v1/contratos/analise-contratual", file_path)
 
-    # ------------------------------------------------------------------
-    # Operações matemáticas
-    # ------------------------------------------------------------------
-
-    def soma_v1(self, numero1: int, numero2: int) -> dict:
-        """Soma dois números via parâmetros de caminho (path params).
-
-        .. deprecated::
-            Este endpoint será descontinuado em 15/06.
-            Prefira :meth:`soma_v2` ou :meth:`soma_v3`.
+    def analise_sms(self, file_path: str) -> dict:
+        """Extrai obrigações de Saúde, Segurança e Meio Ambiente (SMS) do contrato.
 
         Args:
-            numero1: Primeiro número.
-            numero2: Segundo número.
+            file_path: Caminho local para o arquivo PDF do contrato.
 
         Returns:
-            Resposta da API com o resultado da soma.
+            Resposta contendo o relatório de SMS gerado pela IA.
         """
-        warnings.warn(
-            "soma_v1() está depreciado e será descontinuado em 15/06. "
-            "Use soma_v2() ou soma_v3() em seu lugar.",
-            DeprecationWarning,
-            stacklevel=2,
+        return self._post_file("/api/v1/contratos/analise-sms", file_path)
+
+    def gerar_checklist(self, file_path: str) -> dict:
+        """Gera um checklist estruturado para apoiar a fiscalização do contrato.
+
+        Args:
+            file_path: Caminho local para o arquivo PDF do contrato.
+
+        Returns:
+            Resposta contendo o checklist gerado em formato Markdown.
+        """
+        return self._post_file("/api/v1/contratos/gerar-checklist", file_path)
+
+    # ------------------------------------------------------------------
+    # Consultas ao Banco de Dados
+    # ------------------------------------------------------------------
+
+    def listar_analises(self, empresa: str | None = None, cnpj: str | None = None) -> List[dict]:
+        """Consulta as análises contratuais salvas no banco de dados.
+
+        Args:
+            empresa: Filtro por nome de empresa (busca parcial).
+            cnpj: Filtro por CNPJ exato.
+
+        Returns:
+            Lista de análises encontradas.
+        """
+        headers = self._get_headers()
+        params = {}
+        if empresa:
+            params["empresa"] = empresa
+        if cnpj:
+            params["cnpj"] = cnpj
+
+        response = self._session.get(
+            f"{self.base_url}/api/v1/contratos/analises", headers=headers, params=params
         )
-        return self._post(f"/soma/v1/{numero1}/{numero2}")
+        response.raise_for_status()
+        return response.json()
 
-    def soma_v2(self, numero1: int, numero2: int) -> dict:
-        """Soma dois números via parâmetros de query.
-
-        Args:
-            numero1: Primeiro número.
-            numero2: Segundo número.
-
-        Returns:
-            Resposta da API com o resultado da soma.
-        """
-        return self._post("/soma/v2", params={"numero1": numero1, "numero2": numero2})
-
-    def soma_v3(self, numero1: int = 5, numero2: int = 3) -> dict:
-        """Soma dois números enviados via corpo da requisição (request body).
+    def obter_analise(self, id_analise: int) -> dict:
+        """Recupera os detalhes completos de uma análise específica por ID.
 
         Args:
-            numero1: Primeiro número (padrão: ``5``).
-            numero2: Segundo número (padrão: ``3``).
+            id_analise: ID do registro no banco de dados.
 
         Returns:
-            ``dict`` com a chave ``"resultado"`` contendo o valor da soma.
+            Dados e relatórios completos da análise.
         """
-        return self._post("/soma/v3", json={"numero1": numero1, "numero2": numero2})
-
-    def operacao_matematica(
-        self,
-        operacao: str,
-        numero1: int = 5,
-        numero2: int = 3,
-    ) -> dict:
-        """Realiza uma operação matemática entre dois números.
-
-        Args:
-            operacao: Tipo de operação. Valores válidos:
-                ``"soma"``, ``"subtracao"``, ``"multiplicacao"``, ``"divisao"``.
-            numero1: Primeiro número (padrão: ``5``).
-            numero2: Segundo número (padrão: ``3``).
-
-        Returns:
-            Resposta da API com o resultado da operação.
-
-        Raises:
-            ValueError: Se ``operacao`` não for um dos valores aceitos.
-        """
-        operacoes_validas = {"soma", "subtracao", "multiplicacao", "divisao"}
-        if operacao not in operacoes_validas:
-            raise ValueError(
-                f"Operação inválida: '{operacao}'. "
-                f"Valores aceitos: {sorted(operacoes_validas)}"
-            )
-        return self._post(
-            "/operacao_matematica/v1",
-            params={"operacao": operacao},
-            json={"numero1": numero1, "numero2": numero2},
+        headers = self._get_headers()
+        response = self._session.get(
+            f"{self.base_url}/api/v1/contratos/analises/{id_analise}", headers=headers
         )
+        response.raise_for_status()
+        return response.json()

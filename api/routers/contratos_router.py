@@ -1,24 +1,33 @@
-from fastapi import APIRouter, File, UploadFile, Depends, HTTPException
-from typing import Dict, Any
+from fastapi import APIRouter, File, UploadFile, Depends, HTTPException, status
+from typing import Dict, Any, List
 from sqlalchemy.orm import Session
 from services.llm_service import process_document_with_skill, extract_text_from_pdf, extract_contract_metadata
 from database import get_db
 from db_models import AnaliseContratualDB
 from utils import get_logger
+from models import AnaliseContratualResponse, AnaliseSMSResponse, GerarChecklistResponse
 
 logger = get_logger()
 router = APIRouter()
 
-@router.post("/analise-contratual", summary="Análise de Multas e Penalidades Contratuais")
+@router.post(
+    "/analise-contratual",
+    response_model=AnaliseContratualResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Análise de Multas e Penalidades Contratuais",
+    description="Recebe um contrato em PDF, extrai cláusulas específicas de penalidades, multas, sanções e prazos de vigência utilizando IA e salva os dados de forma estruturada no banco de dados.",
+    response_description="Análise realizada e salva no banco de dados com sucesso."
+)
 async def analise_contratual(
     file: UploadFile = File(...),
     db: Session = Depends(get_db)
-) -> Dict[str, Any]:
+):
     """
     Recebe um contrato em PDF, extrai cláusulas específicas de penalidades, 
     multas, sanções e prazos de vigência utilizando IA e salva os dados de forma estruturada no banco de dados.
     """
     logger.info("Endpoint /analise-contratual chamado.")
+    print("\n--> [LOG] Endpoint /analise-contratual chamado.")
     
     # 1. Gerar o relatório de análise textual (markdown)
     resultado = await process_document_with_skill(file, "analisador-contratual")
@@ -49,6 +58,7 @@ async def analise_contratual(
     db.refresh(db_entry)
     
     logger.info(f"Análise persistida com sucesso no banco de dados. ID: {db_entry.id}")
+    print(f"--> [LOG] Análise persistida com sucesso no banco. ID: {db_entry.id}\n")
     
     return {
         "id_analise": db_entry.id,
@@ -63,24 +73,42 @@ async def analise_contratual(
         }
     }
 
-@router.post("/analise-sms", summary="Análise de Requisitos SMS")
-async def analise_sms(file: UploadFile = File(...)) -> Dict[str, str]:
+@router.post(
+    "/analise-sms",
+    response_model=AnaliseSMSResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Análise de Requisitos SMS",
+    description="Recebe um anexo/contrato em PDF e extrai obrigações de Segurança, Meio Ambiente e Saúde aplicáveis à Contratada.",
+    response_description="Obrigações de SMS extraídas com sucesso."
+)
+async def analise_sms(file: UploadFile = File(...)):
     """
     Recebe um anexo/contrato em PDF e extrai obrigações de 
     Segurança, Meio Ambiente e Saúde aplicáveis à Contratada.
     """
     logger.info("Endpoint /analise-sms chamado.")
+    print("\n--> [LOG] Endpoint /analise-sms chamado.")
     resultado = await process_document_with_skill(file, "analisador-sms")
+    print("--> [LOG] Análise de SMS concluída com sucesso.\n")
     return {"analise": resultado}
 
-@router.post("/gerar-checklist", summary="Geração de Checklist de Fiscalização")
-async def gerar_checklist(file: UploadFile = File(...)) -> Dict[str, str]:
+@router.post(
+    "/gerar-checklist",
+    response_model=GerarChecklistResponse,
+    status_code=status.HTTP_201_CREATED,
+    summary="Geração de Checklist de Fiscalização",
+    description="Recebe um contrato em PDF e gera automaticamente um checklist de verificação para apoiar o processo de recebimento e fiscalização.",
+    response_description="Checklist gerado com sucesso."
+)
+async def gerar_checklist(file: UploadFile = File(...)):
     """
     Recebe um contrato em PDF e gera automaticamente um checklist de verificação 
     para apoiar o processo de recebimento e fiscalização.
     """
     logger.info("Endpoint /gerar-checklist chamado.")
+    print("\n--> [LOG] Endpoint /gerar-checklist chamado.")
     resultado = await process_document_with_skill(file, "gerador-checklist-contratual")
+    print("--> [LOG] Checklist gerado com sucesso.\n")
     return {"analise": resultado}
 
 @router.get("/analises", summary="Listar Análises Contratuais Persistidas")

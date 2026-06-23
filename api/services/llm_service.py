@@ -12,16 +12,29 @@ SKILLS_DIR = BASE_DIR / ".agents" / "skills"
 
 
 def extract_text_from_pdf(file_bytes: bytes) -> str:
-    """Extrai texto de um arquivo PDF usando PyMuPDF (fitz)."""
+    """Extrai texto de um arquivo PDF usando PyMuPDF (fitz) e valida se é digitalizável."""
     try:
         doc = fitz.open(stream=file_bytes, filetype="pdf")
-        text = ""
-        for page in doc:
-            text += page.get_text() + "\n"
-        return text.strip()
     except Exception as e:
-        logger.error(f"Erro ao extrair texto do PDF: {e}")
-        raise HTTPException(status_code=400, detail="Erro ao processar o arquivo PDF. Verifique se o arquivo é válido.")
+        logger.error(f"Erro ao abrir arquivo PDF: {e}")
+        raise HTTPException(
+            status_code=400,
+            detail="Erro ao processar o arquivo PDF. Verifique se o arquivo está corrompido ou é inválido."
+        )
+
+    text = ""
+    for page in doc:
+        text += page.get_text() + "\n"
+
+    extracted = text.strip()
+    if not extracted:
+        msg = "O arquivo PDF fornecido está digitalizado (imagem) ou não contém texto selecionável. Para realizar a análise, envie um PDF pesquisável (com texto digital selecionável)."
+        logger.warning(msg)
+        raise HTTPException(
+            status_code=400,
+            detail=msg
+        )
+    return extracted
 
 
 def get_skill_prompt(skill_name: str) -> str:
@@ -39,17 +52,32 @@ def get_skill_prompt(skill_name: str) -> str:
 import asyncio
 
 async def process_document_with_skill(file: UploadFile, skill_name: str) -> str:
-    """Extrai o texto do documento e envia para a IA com o prompt da skill."""
+    """Extrai o texto do documento e envia para a IA com o prompt da skill com validações de tamanho e formato."""
     logger.info(f"Processando arquivo {file.filename} com a skill {skill_name}")
     
     if not file.filename.lower().endswith(".pdf"):
-        raise HTTPException(status_code=400, detail="Apenas arquivos PDF são suportados no momento.")
+        msg = f"Formato de arquivo inválido ({file.filename}). Apenas documentos em formato PDF (.pdf) são aceitos."
+        logger.warning(msg)
+        raise HTTPException(
+            status_code=400,
+            detail=msg
+        )
 
     file_bytes = await file.read()
     
+    # Validação de tamanho máximo (50 MB)
+    MAX_FILE_SIZE = 50 * 1024 * 1024  # 50 MB em bytes
+    file_size = len(file_bytes)
+    if file_size > MAX_FILE_SIZE:
+        file_size_mb = file_size / (1024 * 1024)
+        msg = f"O arquivo enviado excede o limite máximo permitido de 50 MB (tamanho enviado: {file_size_mb:.2f} MB)."
+        logger.warning(msg)
+        raise HTTPException(
+            status_code=400,
+            detail=msg
+        )
+    
     document_text = extract_text_from_pdf(file_bytes)
-    if not document_text:
-        raise HTTPException(status_code=400, detail="Não foi possível extrair texto do PDF fornecido.")
     
     skill_instructions = get_skill_prompt(skill_name)
     
@@ -61,6 +89,8 @@ async def process_document_with_skill(file: UploadFile, skill_name: str) -> str:
         # Usamos to_thread para não travar o loop do FastAPI
         resultado = await asyncio.to_thread(execute_prompt, prompt)
         return resultado
+    except HTTPException as he:
+        raise he
     except Exception as e:
         logger.error(f"Erro na execução da IA: {e}")
         raise HTTPException(status_code=502, detail="Erro ao comunicar com o serviço de IA.")

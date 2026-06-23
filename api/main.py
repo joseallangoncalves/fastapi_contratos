@@ -12,7 +12,7 @@ import db_models
 
 Base.metadata.create_all(bind=engine)
 
-load_dotenv(find_dotenv())
+load_dotenv(find_dotenv(), override=True)
 
 
 app = FastAPI(
