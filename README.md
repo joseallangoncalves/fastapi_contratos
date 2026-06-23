@@ -40,7 +40,11 @@ fastapi dev api\main.py
 
 A aplicação estará disponível em: http://localhost:8000
 A documentação interativa (Swagger UI) estará em: http://localhost:8000/docs
+### Credenciais Fictícias (Apenas para Avaliação/Testes Locais)
 
+Para testar o fluxo de autenticação e obter o token de acesso no Swagger UI, utilize as seguintes credenciais de teste configuradas temporariamente em memória:
+- **Username:** `johndoe`
+- **Password:** `secret`
 
-username: johndoe
-password: secret
+*Nota de Boas Práticas: Em ambiente real de produção, as credenciais e hashes de senhas são gerenciados no banco de dados e as variáveis sensíveis são injetadas de forma segura, nunca expostas no código ou no arquivo README.*
+
