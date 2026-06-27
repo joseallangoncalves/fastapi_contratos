@@ -96,57 +96,212 @@ async def process_document_with_skill(file: UploadFile, skill_name: str) -> str:
         raise HTTPException(status_code=502, detail="Erro ao comunicar com o serviço de IA.")
 
 
-from pydantic import BaseModel, Field
+from datetime import date
+from pydantic import BaseModel, Field, field_validator
 
 class ContratoSchema(BaseModel):
-    empresa: str = Field(description="Nome da empresa contratada")
-    cnpj: str = Field(description="CNPJ da empresa contratada")
-    data_inicio: str = Field(description="Data de início do contrato")
-    data_fim: str = Field(description="Data de fim do contrato")
-    valor_contrato: str = Field(description="Valor do contrato")
-    vigencia_prazo: str = Field(description="Cópia ou transcrição exata e na íntegra das cláusulas do contrato referentes à vigência e prazo.")
-    multas_moratorias: str = Field(description="Cópia ou transcrição exata e na íntegra das cláusulas do contrato referentes a multas moratórias por atraso.")
-    multas_compensatorias: str = Field(description="Cópia ou transcrição exata e na íntegra das cláusulas do contrato referentes a multas compensatórias.")
-    sancoes_administrativas: str = Field(description="Cópia ou transcrição exata e na íntegra das cláusulas do contrato referentes a sanções administrativas.")
-    rescisao: str = Field(description="Cópia ou transcrição exata e na íntegra das cláusulas do contrato referentes às condições de rescisão.")
+    empresa: str | None = Field(None, description="Nome da empresa contratada")
+    cnpj: str | None = Field(None, description="CNPJ da empresa contratada")
+    data_inicio: date | None = Field(
+        None,
+        description="Data de início de vigência. Deve ser a data da assinatura digital do contrato (formato YYYY-MM-DD)."
+    )
+    data_fim: date | None = Field(
+        None,
+        description="Data de término (fim) de vigência, calculada somando-se a vigencia_prazo em dias à data de início (formato YYYY-MM-DD)."
+    )
+    vigencia_prazo: int | None = Field(
+        None,
+        description="Prazo de vigência do contrato em dias (número inteiro positivo maior que zero)."
+    )
+    valor_contrato: str | None = Field(None, description="Valor do contrato")
+    clausula_vigencia: str | None = Field(None, description="Cópia ou transcrição exata e na íntegra das cláusulas do contrato referentes à vigência e prazo.")
+    multas_moratorias: str | None = Field(None, description="Cópia ou transcrição exata e na íntegra das cláusulas do contrato referentes a multas moratórias por atraso.")
+    multas_compensatorias: str | None = Field(None, description="Cópia ou transcrição exata e na íntegra das cláusulas do contrato referentes a multas compensatórias.")
+    sancoes_administrativas: str | None = Field(None, description="Cópia ou transcrição exata e na íntegra das cláusulas do contrato referentes a sanções administrativas.")
+    rescisao: str | None = Field(None, description="Cópia ou transcrição exata e na íntegra das cláusulas do contrato referentes às condições de rescisão.")
+    numero_contrato: str | None = Field(None, description="Número identificador do contrato (ex: Contrato nº 123/2026, Contrato de Prestação de Serviços nº XXX, etc.)")
+    numero_oportunidade: str | None = Field(None, description="Número identificador da oportunidade associada (ex: Oportunidade nº 700xxxxxxx, etc.)")
+
+    @field_validator("vigencia_prazo")
+    @classmethod
+    def validate_vigencia_prazo(cls, v):
+        if v is not None and v <= 0:
+            raise ValueError("O prazo de vigência deve ser um número inteiro positivo maior que zero.")
+        return v
 
 
 async def extract_contract_metadata(document_text: str) -> dict:
-    """Extrai os metadados do contrato de forma estruturada via LLM."""
+    """Extrai os metadados do contrato de forma estruturada via LLM com validação de tipos."""
     logger.info("Iniciando extração estruturada de metadados do contrato.")
     
     prompt = (
         "Você é um especialista em análise de contratos. Extraia as seguintes informações do texto do contrato fornecido abaixo:\n"
         "1. Nome da empresa contratada\n"
         "2. CNPJ da empresa contratada\n"
-        "3. Data de início do contrato\n"
-        "4. Data de fim do contrato\n"
-        "5. Valor do contrato\n"
-        "6. Vigência e Prazo (Cópia textual exata e na íntegra das cláusulas de vigência/prazo)\n"
-        "7. Multas Moratórias (Cópia textual exata e na íntegra das cláusulas de multas moratórias/atraso)\n"
-        "8. Multas Compensatórias (Cópia textual exata e na íntegra das cláusulas de multas compensatórias)\n"
-        "9. Sanções Administrativas (Cópia textual exata e na íntegra das cláusulas de sanções administrativas)\n"
-        "10. Condições de Rescisão (Cópia textual exata e na íntegra das cláusulas de rescisão)\n\n"
-        "ATENÇÃO: Para os itens 6 a 10, você DEVE transcrever literalmente o texto das cláusulas encontradas no contrato, sem resumir ou simplificar o conteúdo.\n\n"
+        "3. Data de início do contrato (identifique e utilize a data de assinatura digital do contrato)\n"
+        "4. Data de fim do contrato (calcule somando o prazo de vigência em dias à data de início da assinatura digital)\n"
+        "5. Prazo de vigência do contrato em dias (número inteiro positivo maior que zero, que preencherá vigencia_prazo)\n"
+        "6. Valor do contrato\n"
+        "7. Vigência e Prazo (Cópia textual exata e na íntegra das cláusulas de vigência/prazo, que preencherá clausula_vigencia)\n"
+        "8. Multas Moratórias (Cópia textual exata e na íntegra das cláusulas de multas moratórias/atraso)\n"
+        "9. Multas Compensatórias (Cópia textual exata e na íntegra das cláusulas de multas compensatórias)\n"
+        "10. Sanções Administrativas (Cópia textual exata e na íntegra das cláusulas de sanções administrativas)\n"
+        "11. Condições de Rescisão (Cópia textual exata e na íntegra das cláusulas de rescisão)\n"
+        "12. Número do Contrato (identifique o identificador único do contrato. Procure por termos como 'ICJ XXXXXXX' ou número do contrato principal, ex: '5900.0132964.25.2')\n"
+        "13. Número da Oportunidade (identifique o identificador de oportunidade/licitação associado, tipicamente contendo 10 dígitos e iniciando com '700', ex: '7004517339', ou localizado no campo 'Identificação' de relatórios de assinaturas)\n\n"
+        "ATENÇÃO: Para as datas de início e fim, retorne no formato padrão AAAA-MM-DD. Para a vigencia_prazo, retorne um número inteiro de dias. Para os itens 7 a 11, você DEVE transcrever literalmente o texto das cláusulas encontradas no contrato, sem resumir ou simplificar o conteúdo.\n\n"
         f"Texto do contrato:\n[DOC_CONTENT]\n{document_text}\n[/DOC_CONTENT]"
     )
     
     try:
         resultado_dict = await asyncio.to_thread(execute_structured_prompt, prompt, ContratoSchema)
-        return resultado_dict
+        # Validação rígida usando o schema Pydantic para converter datas e inteiro
+        validated = ContratoSchema(**resultado_dict)
+        return validated.model_dump()
     except Exception as e:
         logger.error(f"Erro na extração estruturada da IA: {e}")
-        # Retorna campos vazios para não impedir o fluxo principal caso dê erro na extração
         return {
             "empresa": "Erro na extração",
             "cnpj": "Erro na extração",
-            "data_inicio": "Erro na extração",
-            "data_fim": "Erro na extração",
+            "data_inicio": None,
+            "data_fim": None,
+            "vigencia_prazo": None,
             "valor_contrato": "Erro na extração",
-            "vigencia_prazo": str(e),
+            "clausula_vigencia": str(e),
             "multas_moratorias": "",
             "multas_compensatorias": "",
             "sancoes_administrativas": "",
-            "rescisao": ""
+            "rescisao": "",
+            "numero_contrato": "Erro na extração",
+            "numero_oportunidade": "Erro na extração"
         }
+
+
+def extract_text_from_pdf_with_page_tags(file_bytes: bytes) -> str:
+    """Extrai o texto do PDF marcando cada página com [PÁGINA X - TIPO: Y] para permitir que a IA mapeie intervalos."""
+    import fitz
+    try:
+        doc = fitz.open(stream=file_bytes, filetype="pdf")
+    except Exception as e:
+        logger.error(f"Erro ao abrir arquivo PDF para marcação: {e}")
+        raise HTTPException(
+            status_code=400,
+            detail="Erro ao processar o arquivo PDF. Verifique se o arquivo está corrompido ou é inválido."
+        )
+
+    text = ""
+    for i, page in enumerate(doc):
+        has_text = bool(page.get_text().strip())
+        has_images = len(page.get_images()) > 0
+        if has_text and has_images:
+            ptype = "Texto + Imagens"
+        elif has_images:
+            ptype = "Imagens"
+        else:
+            ptype = "Texto"
+            
+        text += f"\n[PÁGINA {i + 1} - TIPO: {ptype}]\n"
+        text += page.get_text() + "\n"
+
+    extracted = text.strip()
+    return extracted
+
+
+async def estratificar_contrato(file: UploadFile) -> dict:
+    """Processa o documento e gera a estratificação de páginas em JSON estruturado."""
+    from models import ReconhecimentoEstratificacaoResponse
+    logger.info(f"Iniciando estratificação de layout do arquivo {file.filename}")
+    
+    if not file.filename.lower().endswith(".pdf"):
+        msg = f"Formato de arquivo inválido ({file.filename}). Apenas documentos em formato PDF (.pdf) são aceitos."
+        logger.warning(msg)
+        raise HTTPException(
+            status_code=400,
+            detail=msg
+        )
+
+    file_bytes = await file.read()
+    
+    # Validação de tamanho máximo (50 MB)
+    MAX_FILE_SIZE = 50 * 1024 * 1024
+    if len(file_bytes) > MAX_FILE_SIZE:
+        file_size_mb = len(file_bytes) / (1024 * 1024)
+        msg = f"O arquivo enviado excede o limite máximo permitido de 50 MB (tamanho enviado: {file_size_mb:.2f} MB)."
+        logger.warning(msg)
+        raise HTTPException(
+            status_code=400,
+            detail=msg
+        )
+        
+    document_text_tagged = extract_text_from_pdf_with_page_tags(file_bytes)
+    skill_instructions = get_skill_prompt("reconhecimento-estratificacao")
+    
+    prompt = (
+        f"{skill_instructions}\n\n"
+        "Aqui está o conteúdo do documento estruturado com marcações de páginas:\n"
+        f"[DOC_CONTENT]\n{document_text_tagged}\n[/DOC_CONTENT]"
+    )
+    
+    try:
+        resultado_dict = await asyncio.to_thread(
+            execute_structured_prompt, prompt, ReconhecimentoEstratificacaoResponse
+        )
+        validated = ReconhecimentoEstratificacaoResponse(**resultado_dict)
+        return validated.model_dump()
+    except Exception as e:
+        logger.error(f"Erro na execução da estratificação da IA: {e}")
+        raise HTTPException(
+            status_code=502,
+            detail="Erro ao comunicar com o serviço de IA para estratificação."
+        )
+
+
+async def ingestao_metadados_contrato(file: UploadFile) -> dict:
+    """Processa o documento e gera a ingestão e extração de metadados cadastrais em JSON estruturado."""
+    from models import IngestaoMetadadosSchema
+    logger.info(f"Iniciando extração de metadados cadastrais do arquivo {file.filename}")
+
+    if not file.filename.lower().endswith(".pdf"):
+        msg = f"Formato de arquivo inválido ({file.filename}). Apenas documentos em formato PDF (.pdf) são aceitos."
+        logger.warning(msg)
+        raise HTTPException(
+            status_code=400,
+            detail=msg
+        )
+
+    file_bytes = await file.read()
+
+    # Validação de tamanho máximo (50 MB)
+    MAX_FILE_SIZE = 50 * 1024 * 1024
+    if len(file_bytes) > MAX_FILE_SIZE:
+        file_size_mb = len(file_bytes) / (1024 * 1024)
+        msg = f"O arquivo enviado excede o limite máximo permitido de 50 MB (tamanho enviado: {file_size_mb:.2f} MB)."
+        logger.warning(msg)
+        raise HTTPException(
+            status_code=400,
+            detail=msg
+        )
+
+    document_text = extract_text_from_pdf(file_bytes)
+    skill_instructions = get_skill_prompt("ingestao-metadados")
+
+    prompt = (
+        f"{skill_instructions}\n\n"
+        "Aqui está o conteúdo do documento a ser analisado:\n"
+        f"[DOC_CONTENT]\n{document_text}\n[/DOC_CONTENT]"
+    )
+
+    try:
+        resultado_dict = await asyncio.to_thread(
+            execute_structured_prompt, prompt, IngestaoMetadadosSchema
+        )
+        validated = IngestaoMetadadosSchema(**resultado_dict)
+        return validated.model_dump()
+    except Exception as e:
+        logger.error(f"Erro na execução da ingestão de metadados da IA: {e}")
+        raise HTTPException(
+            status_code=502,
+            detail="Erro ao comunicar com o serviço de IA para ingestão de metadados."
+        )
 

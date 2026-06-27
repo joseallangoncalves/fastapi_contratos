@@ -12,6 +12,27 @@ import db_models
 
 Base.metadata.create_all(bind=engine)
 
+# Migração automática das novas colunas para SQLite
+from sqlalchemy import inspect, text
+inspector = inspect(engine)
+try:
+    columns = [col["name"] for col in inspector.get_columns("analises_contratuais")]
+    with engine.begin() as conn:
+        if "numero_contrato" not in columns:
+            conn.execute(text("ALTER TABLE analises_contratuais ADD COLUMN numero_contrato VARCHAR"))
+        if "numero_oportunidade" not in columns:
+            conn.execute(text("ALTER TABLE analises_contratuais ADD COLUMN numero_oportunidade VARCHAR"))
+
+    # Migração para a tabela reconhecimento_estratificacao
+    columns_strat = [col["name"] for col in inspector.get_columns("reconhecimento_estratificacao")]
+    with engine.begin() as conn:
+        for suffix in ["relatorio_assinatura", "instrumento_contratual_icj", "especificacao_tecnica_memorial", "planilha_precos_ppu", "anexo_sms", "circulares_conformidade"]:
+            col_name = f"{suffix}_tipo"
+            if col_name not in columns_strat:
+                conn.execute(text(f"ALTER TABLE reconhecimento_estratificacao ADD COLUMN {col_name} VARCHAR"))
+except Exception as e:
+    print(f"--> [MIGRATION WARNING] Erro na migração das novas colunas: {e}")
+
 load_dotenv(find_dotenv(), override=True)
 
 

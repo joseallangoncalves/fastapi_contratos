@@ -39,15 +39,18 @@ Ao realizar a análise de um contrato através do endpoint `/api/v1/contratos/an
 | `id` | INTEGER (PK) | Chave primária autoincrementada. |
 | `empresa` | VARCHAR | Nome da empresa contratada. |
 | `cnpj` | VARCHAR | CNPJ da empresa contratada. |
-| `data_inicio` | VARCHAR | Data de início da vigência do contrato. |
-| `data_fim` | VARCHAR | Data de término da vigência do contrato. |
+| `data_inicio` | DATE | Data de início de vigência (assinatura digital). |
+| `data_fim` | DATE | Data de término de vigência (calculada com base no prazo). |
+| `vigencia_prazo` | INTEGER | Prazo de vigência do contrato em meses (número inteiro positivo). |
 | `valor_contrato` | VARCHAR | Valor total ou estimado do contrato. |
 | `data_insercao` | DATETIME | Data e hora em que a análise foi persistida no banco. |
-| `vigencia_prazo` | TEXT | Item 1 da Skill: Vigência e Prazo (cláusula textual literal extraída do contrato). |
+| `clausula_vigencia` | TEXT | Item 1 da Skill: Cópia textual literal da cláusula de vigência extraída do contrato. |
 | `multas_moratorias` | TEXT | Item 2 da Skill: Multas Moratórias (cláusula textual literal extraída do contrato). |
 | `multas_compensatorias` | TEXT | Item 3 da Skill: Multas Compensatórias (cláusula textual literal extraída do contrato). |
 | `sancoes_administrativas` | TEXT | Item 4 da Skill: Sanções Administrativas (cláusula textual literal extraída do contrato). |
 | `rescisao` | TEXT | Item 5 da Skill: Condições de Rescisão (cláusula textual literal extraída do contrato). |
+| `numero_contrato` | VARCHAR | Número identificador do contrato (ex: 123/2026). |
+| `numero_oportunidade` | VARCHAR | Número identificador da oportunidade associada (ex: 700xxxxxxx). |
 
 ---
 
@@ -99,16 +102,19 @@ Instanciação do `engine` do SQLAlchemy, definição do `SessionLocal` e da bas
 Função dedicada a realizar a chamada estruturada do Gemini para extrair metadados e trechos de cláusulas literais na íntegra:
 ```python
 class ContratoSchema(BaseModel):
-    empresa: str
-    cnpj: str
-    data_inicio: str
-    data_fim: str
-    valor_contrato: str
-    vigencia_prazo: str  # Trecho exato/literal
-    multas_moratorias: str  # Trecho exato/literal
-    multas_compensatorias: str  # Trecho exato/literal
-    sancoes_administrativas: str  # Trecho exato/literal
-    rescisao: str  # Trecho exato/literal
+    empresa: str | None
+    cnpj: str | None
+    data_inicio: date | None  # Formato YYYY-MM-DD
+    data_fim: date | None     # Formato YYYY-MM-DD
+    vigencia_prazo: int | None # Prazo inteiro positivo
+    valor_contrato: str | None
+    clausula_vigencia: str | None # Trecho exato/literal
+    multas_moratorias: str | None # Trecho exato/literal
+    multas_compensatorias: str | None # Trecho exato/literal
+    sancoes_administrativas: str | None # Trecho exato/literal
+    rescisao: str | None # Trecho exato/literal
+    numero_contrato: str | None # Identificador do contrato
+    numero_oportunidade: str | None # Identificador da oportunidade
 ```
 Essa classe será enviada na configuração de `response_schema` da API do Gemini para garantir retorno JSON tipado e contendo as cláusulas literais.
 

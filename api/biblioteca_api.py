@@ -87,27 +87,27 @@ class BibliotecaAPI:
         """
         return self._post_file("/api/v1/contratos/analise-contratual", file_path)
 
-    def analise_sms(self, file_path: str) -> dict:
-        """Extrai obrigações de Saúde, Segurança e Meio Ambiente (SMS) do contrato.
+    def reconhecimento_estratificacao(self, file_path: str) -> dict:
+        """Mapeia os intervalos de páginas de cada seção do contrato e extrai seu número.
 
         Args:
             file_path: Caminho local para o arquivo PDF do contrato.
 
         Returns:
-            Resposta contendo o relatório de SMS gerado pela IA.
+            Resposta contendo o número do contrato e intervalos de páginas das seções.
         """
-        return self._post_file("/api/v1/contratos/analise-sms", file_path)
+        return self._post_file("/api/v1/contratos/reconhecimento-estratificacao", file_path)
 
-    def gerar_checklist(self, file_path: str) -> dict:
-        """Gera um checklist estruturado para apoiar a fiscalização do contrato.
+    def ingestao_metadados(self, file_path: str) -> dict:
+        """Extrai os metadados cadastrais principais (objeto, contratante, contratada, prazos e valor) e os salva no banco de dados.
 
         Args:
             file_path: Caminho local para o arquivo PDF do contrato.
 
         Returns:
-            Resposta contendo o checklist gerado em formato Markdown.
+            Resposta contendo os metadados cadastrais extraídos e persistidos.
         """
-        return self._post_file("/api/v1/contratos/gerar-checklist", file_path)
+        return self._post_file("/api/v1/contratos/ingestao-metadados", file_path)
 
     # ------------------------------------------------------------------
     # Consultas ao Banco de Dados
@@ -148,6 +148,81 @@ class BibliotecaAPI:
         headers = self._get_headers()
         response = self._session.get(
             f"{self.base_url}/api/v1/contratos/analises/{id_analise}", headers=headers
+        )
+        response.raise_for_status()
+        return response.json()
+
+    def listar_estratificacoes(self, numero_contrato: str | None = None) -> List[dict]:
+        """Consulta as estratificações de páginas de contratos salvas no banco de dados.
+
+        Args:
+            numero_contrato: Filtro por número identificador do contrato.
+
+        Returns:
+            Lista de estratificações encontradas.
+        """
+        headers = self._get_headers()
+        params = {}
+        if numero_contrato:
+            params["numero_contrato"] = numero_contrato
+
+        response = self._session.get(
+            f"{self.base_url}/api/v1/contratos/reconhecimento-estratificacao", headers=headers, params=params
+        )
+        response.raise_for_status()
+        return response.json()
+
+    def obter_estratificacao(self, id_estratificacao: int) -> dict:
+        """Recupera os detalhes de uma estratificação de páginas por ID.
+
+        Args:
+            id_estratificacao: ID do registro de estratificação no banco.
+
+        Returns:
+            Dados de estratificação de páginas do contrato.
+        """
+        headers = self._get_headers()
+        response = self._session.get(
+            f"{self.base_url}/api/v1/contratos/reconhecimento-estratificacao/{id_estratificacao}", headers=headers
+        )
+        response.raise_for_status()
+        return response.json()
+
+    def listar_metadados(self, numero_contrato: str | None = None, contratada: str | None = None) -> List[dict]:
+        """Consulta os registros de metadados cadastrais persistidos.
+
+        Args:
+            numero_contrato: Filtro por número de contrato.
+            contratada: Filtro por nome da empresa contratada.
+
+        Returns:
+            Lista de registros de metadados encontrados.
+        """
+        headers = self._get_headers()
+        params = {}
+        if numero_contrato:
+            params["numero_contrato"] = numero_contrato
+        if contratada:
+            params["contratada"] = contratada
+
+        response = self._session.get(
+            f"{self.base_url}/api/v1/contratos/ingestao-metadados", headers=headers, params=params
+        )
+        response.raise_for_status()
+        return response.json()
+
+    def obter_metadados(self, id_metadados: int) -> dict:
+        """Recupera os detalhes de um registro específico de metadados cadastrais por ID.
+
+        Args:
+            id_metadados: ID do registro de metadados cadastrais no banco.
+
+        Returns:
+            Metadados cadastrais do contrato.
+        """
+        headers = self._get_headers()
+        response = self._session.get(
+            f"{self.base_url}/api/v1/contratos/ingestao-metadados/{id_metadados}", headers=headers
         )
         response.raise_for_status()
         return response.json()
