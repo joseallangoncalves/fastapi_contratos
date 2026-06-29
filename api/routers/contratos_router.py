@@ -1,4 +1,13 @@
-from fastapi import APIRouter, File, UploadFile, Depends, HTTPException, status, Query, Path
+from fastapi import (
+    APIRouter,
+    File,
+    UploadFile,
+    Depends,
+    HTTPException,
+    status,
+    Query,
+    Path,
+)
 from typing import Dict, Any, List
 from sqlalchemy import func
 from sqlalchemy.orm import Session
@@ -10,7 +19,11 @@ from services.llm_service import (
     ingestao_metadados_contrato,
 )
 from database import get_db
-from db_models import AnaliseContratualDB, IngestaoMetadadosDB, ReconhecimentoEstratificacaoDB
+from db_models import (
+    AnaliseContratualDB,
+    IngestaoMetadadosDB,
+    ReconhecimentoEstratificacaoDB,
+)
 from utils import get_logger
 from models import (
     AnaliseContratualResponse,
@@ -26,47 +39,50 @@ router = APIRouter()
 
 
 # Helper para formatar retorno de estratificação
-def format_estratificacao_db_to_response(db_entry: ReconhecimentoEstratificacaoDB) -> dict:
+def format_estratificacao_db_to_response(
+    db_entry: ReconhecimentoEstratificacaoDB,
+) -> dict:
     return {
         "id": db_entry.id,
         "numero_contrato": db_entry.numero_contrato,
         "relatorio_assinatura": {
             "pagina_inicio": db_entry.relatorio_assinatura_inicio,
             "pagina_fim": db_entry.relatorio_assinatura_fim,
-            "tipo": db_entry.relatorio_assinatura_tipo
+            "tipo": db_entry.relatorio_assinatura_tipo,
         },
         "instrumento_contratual_icj": {
             "pagina_inicio": db_entry.instrumento_contratual_icj_inicio,
             "pagina_fim": db_entry.instrumento_contratual_icj_fim,
-            "tipo": db_entry.instrumento_contratual_icj_tipo
+            "tipo": db_entry.instrumento_contratual_icj_tipo,
         },
         "especificacao_tecnica_memorial": {
             "pagina_inicio": db_entry.especificacao_tecnica_memorial_inicio,
             "pagina_fim": db_entry.especificacao_tecnica_memorial_fim,
-            "tipo": db_entry.especificacao_tecnica_memorial_tipo
+            "tipo": db_entry.especificacao_tecnica_memorial_tipo,
         },
         "planilha_precos_ppu": {
             "pagina_inicio": db_entry.planilha_precos_ppu_inicio,
             "pagina_fim": db_entry.planilha_precos_ppu_fim,
-            "tipo": db_entry.planilha_precos_ppu_tipo
+            "tipo": db_entry.planilha_precos_ppu_tipo,
         },
         "anexo_sms": {
             "pagina_inicio": db_entry.anexo_sms_inicio,
             "pagina_fim": db_entry.anexo_sms_fim,
-            "tipo": db_entry.anexo_sms_tipo
+            "tipo": db_entry.anexo_sms_tipo,
         },
         "circulares_conformidade": {
             "pagina_inicio": db_entry.circulares_conformidade_inicio,
             "pagina_fim": db_entry.circulares_conformidade_fim,
-            "tipo": db_entry.circulares_conformidade_tipo
+            "tipo": db_entry.circulares_conformidade_tipo,
         },
-        "data_insercao": db_entry.data_insercao
+        "data_insercao": db_entry.data_insercao,
     }
 
 
 # ==================================================================
 # 1. ROTAS DE CRIAÇÃO / CADASTRO (POST)
 # ==================================================================
+
 
 # --- 1.1 RECONHECIMENTO E ESTRATIFICAÇÃO ---
 @router.post(
@@ -76,10 +92,14 @@ def format_estratificacao_db_to_response(db_entry: ReconhecimentoEstratificacaoD
     summary="Mapeamento e Estratificação de Documentos Contratuais",
     description="Recebe um contrato em PDF (tamanho máximo de 50MB), analisa o sumário e as primeiras páginas para mapear os intervalos de páginas de cada seção do contrato, além de extrair o número do contrato e salvar a análise no banco de dados.",
     response_description="Intervalos de páginas mapeados, número do contrato extraído e persistido com sucesso.",
+    tags=["Análise de Contratos (IA)"],
 )
 async def reconhecimento_estratificacao(
-    file: UploadFile = File(..., description="Arquivo PDF do contrato ou documento a ser processado (formato aceito: .pdf, tamanho máximo: 50MB)."),
-    db: Session = Depends(get_db)
+    file: UploadFile = File(
+        ...,
+        description="Arquivo PDF do contrato ou documento a ser processado (formato aceito: .pdf, tamanho máximo: 50MB).",
+    ),
+    db: Session = Depends(get_db),
 ):
     """
     Recebe um contrato em PDF, analisa o sumário e as primeiras páginas para
@@ -100,24 +120,86 @@ async def reconhecimento_estratificacao(
     # Persistir no banco de dados
     db_entry = ReconhecimentoEstratificacaoDB(
         numero_contrato=resultado.get("numero_contrato"),
-        relatorio_assinatura_inicio=resultado.get("relatorio_assinatura", {}).get("pagina_inicio") if resultado.get("relatorio_assinatura") else None,
-        relatorio_assinatura_fim=resultado.get("relatorio_assinatura", {}).get("pagina_fim") if resultado.get("relatorio_assinatura") else None,
-        relatorio_assinatura_tipo=resultado.get("relatorio_assinatura", {}).get("tipo") if resultado.get("relatorio_assinatura") else None,
-        instrumento_contratual_icj_inicio=resultado.get("instrumento_contratual_icj", {}).get("pagina_inicio") if resultado.get("instrumento_contratual_icj") else None,
-        instrumento_contratual_icj_fim=resultado.get("instrumento_contratual_icj", {}).get("pagina_fim") if resultado.get("instrumento_contratual_icj") else None,
-        instrumento_contratual_icj_tipo=resultado.get("instrumento_contratual_icj", {}).get("tipo") if resultado.get("instrumento_contratual_icj") else None,
-        especificacao_tecnica_memorial_inicio=resultado.get("especificacao_tecnica_memorial", {}).get("pagina_inicio") if resultado.get("especificacao_tecnica_memorial") else None,
-        especificacao_tecnica_memorial_fim=resultado.get("especificacao_tecnica_memorial", {}).get("pagina_fim") if resultado.get("especificacao_tecnica_memorial") else None,
-        especificacao_tecnica_memorial_tipo=resultado.get("especificacao_tecnica_memorial", {}).get("tipo") if resultado.get("especificacao_tecnica_memorial") else None,
-        planilha_precos_ppu_inicio=resultado.get("planilha_precos_ppu", {}).get("pagina_inicio") if resultado.get("planilha_precos_ppu") else None,
-        planilha_precos_ppu_fim=resultado.get("planilha_precos_ppu", {}).get("pagina_fim") if resultado.get("planilha_precos_ppu") else None,
-        planilha_precos_ppu_tipo=resultado.get("planilha_precos_ppu", {}).get("tipo") if resultado.get("planilha_precos_ppu") else None,
-        anexo_sms_inicio=resultado.get("anexo_sms", {}).get("pagina_inicio") if resultado.get("anexo_sms") else None,
-        anexo_sms_fim=resultado.get("anexo_sms", {}).get("pagina_fim") if resultado.get("anexo_sms") else None,
-        anexo_sms_tipo=resultado.get("anexo_sms", {}).get("tipo") if resultado.get("anexo_sms") else None,
-        circulares_conformidade_inicio=resultado.get("circulares_conformidade", {}).get("pagina_inicio") if resultado.get("circulares_conformidade") else None,
-        circulares_conformidade_fim=resultado.get("circulares_conformidade", {}).get("pagina_fim") if resultado.get("circulares_conformidade") else None,
-        circulares_conformidade_tipo=resultado.get("circulares_conformidade", {}).get("tipo") if resultado.get("circulares_conformidade") else None,
+        relatorio_assinatura_inicio=resultado.get("relatorio_assinatura", {}).get(
+            "pagina_inicio"
+        )
+        if resultado.get("relatorio_assinatura")
+        else None,
+        relatorio_assinatura_fim=resultado.get("relatorio_assinatura", {}).get(
+            "pagina_fim"
+        )
+        if resultado.get("relatorio_assinatura")
+        else None,
+        relatorio_assinatura_tipo=resultado.get("relatorio_assinatura", {}).get("tipo")
+        if resultado.get("relatorio_assinatura")
+        else None,
+        instrumento_contratual_icj_inicio=resultado.get(
+            "instrumento_contratual_icj", {}
+        ).get("pagina_inicio")
+        if resultado.get("instrumento_contratual_icj")
+        else None,
+        instrumento_contratual_icj_fim=resultado.get(
+            "instrumento_contratual_icj", {}
+        ).get("pagina_fim")
+        if resultado.get("instrumento_contratual_icj")
+        else None,
+        instrumento_contratual_icj_tipo=resultado.get(
+            "instrumento_contratual_icj", {}
+        ).get("tipo")
+        if resultado.get("instrumento_contratual_icj")
+        else None,
+        especificacao_tecnica_memorial_inicio=resultado.get(
+            "especificacao_tecnica_memorial", {}
+        ).get("pagina_inicio")
+        if resultado.get("especificacao_tecnica_memorial")
+        else None,
+        especificacao_tecnica_memorial_fim=resultado.get(
+            "especificacao_tecnica_memorial", {}
+        ).get("pagina_fim")
+        if resultado.get("especificacao_tecnica_memorial")
+        else None,
+        especificacao_tecnica_memorial_tipo=resultado.get(
+            "especificacao_tecnica_memorial", {}
+        ).get("tipo")
+        if resultado.get("especificacao_tecnica_memorial")
+        else None,
+        planilha_precos_ppu_inicio=resultado.get("planilha_precos_ppu", {}).get(
+            "pagina_inicio"
+        )
+        if resultado.get("planilha_precos_ppu")
+        else None,
+        planilha_precos_ppu_fim=resultado.get("planilha_precos_ppu", {}).get(
+            "pagina_fim"
+        )
+        if resultado.get("planilha_precos_ppu")
+        else None,
+        planilha_precos_ppu_tipo=resultado.get("planilha_precos_ppu", {}).get("tipo")
+        if resultado.get("planilha_precos_ppu")
+        else None,
+        anexo_sms_inicio=resultado.get("anexo_sms", {}).get("pagina_inicio")
+        if resultado.get("anexo_sms")
+        else None,
+        anexo_sms_fim=resultado.get("anexo_sms", {}).get("pagina_fim")
+        if resultado.get("anexo_sms")
+        else None,
+        anexo_sms_tipo=resultado.get("anexo_sms", {}).get("tipo")
+        if resultado.get("anexo_sms")
+        else None,
+        circulares_conformidade_inicio=resultado.get("circulares_conformidade", {}).get(
+            "pagina_inicio"
+        )
+        if resultado.get("circulares_conformidade")
+        else None,
+        circulares_conformidade_fim=resultado.get("circulares_conformidade", {}).get(
+            "pagina_fim"
+        )
+        if resultado.get("circulares_conformidade")
+        else None,
+        circulares_conformidade_tipo=resultado.get("circulares_conformidade", {}).get(
+            "tipo"
+        )
+        if resultado.get("circulares_conformidade")
+        else None,
     )
     db.add(db_entry)
     db.commit()
@@ -135,10 +217,14 @@ async def reconhecimento_estratificacao(
     summary="Ingestão e Extração de Metadados Contratuais",
     description="Recebe um contrato em PDF (tamanho máximo de 50MB), extrai os principais metadados cadastrais utilizando IA (contratante, contratada, objeto, prazos e valor total) e os persiste no banco de dados.",
     response_description="Metadados extraídos e persistidos com sucesso.",
+    tags=["Análise de Contratos (IA)"],
 )
 async def ingestao_metadados(
-    file: UploadFile = File(..., description="Arquivo PDF do contrato ou documento a ser processado (formato aceito: .pdf, tamanho máximo: 50MB)."),
-    db: Session = Depends(get_db)
+    file: UploadFile = File(
+        ...,
+        description="Arquivo PDF do contrato ou documento a ser processado (formato aceito: .pdf, tamanho máximo: 50MB).",
+    ),
+    db: Session = Depends(get_db),
 ):
     """
     Recebe um contrato em PDF, extrai os principais metadados cadastrais utilizando IA
@@ -187,10 +273,14 @@ async def ingestao_metadados(
     summary="Análise de Multas e Penalidades Contratuais",
     description="Recebe um contrato em PDF (tamanho máximo de 50MB), extrai cláusulas específicas de penalidades, multas, sanções e prazos de vigência utilizando IA e salva os dados de forma estruturada no banco de dados.",
     response_description="Análise realizada e salva no banco de dados com sucesso.",
+    tags=["Análise de Contratos (IA)"],
 )
 async def analise_contratual(
-    file: UploadFile = File(..., description="Arquivo PDF do contrato ou documento a ser processado (formato aceito: .pdf, tamanho máximo: 50MB)."),
-    db: Session = Depends(get_db)
+    file: UploadFile = File(
+        ...,
+        description="Arquivo PDF do contrato ou documento a ser processado (formato aceito: .pdf, tamanho máximo: 50MB).",
+    ),
+    db: Session = Depends(get_db),
 ):
     """
     Recebe um contrato em PDF, extrai cláusulas específicas de penalidades,
@@ -270,19 +360,21 @@ async def analise_contratual(
 # 2. ROTAS DE CONSULTA / RECUPERAÇÃO (GET)
 # ==================================================================
 
+
 # --- 2.1 ESTRATIFICAÇÃO ---
 @router.get(
     "/reconhecimento-estratificacao",
     response_model=List[ReconhecimentoEstratificacaoFullResponse],
     summary="Listar Estratificações de Páginas Persistidas",
+    tags=["Consultas Gerais"],
 )
 async def listar_estratificacoes(
     numero_contrato: str | None = Query(
         None,
         description="Filtro por Número de Contrato. Requer exatamente 14 dígitos numéricos (com ou sem pontuação).",
-        examples=["59000132964252"]
+        examples=["59000132964252"],
     ),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """
     Retorna uma lista de todas as estratificações de páginas de contratos salvas no banco de dados.
@@ -296,16 +388,34 @@ async def listar_estratificacoes(
         if len(digits_only) != 14:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Número de contrato inválido ({numero_contrato}). O número de contrato deve conter exatamente 14 dígitos numéricos (ex: 5900.0132964.25.2)."
+                detail=f"Número de contrato inválido ({numero_contrato}). O número de contrato deve conter exatamente 14 dígitos numéricos (ex: 5900.0132964.25.2).",
             )
-            
-        cleaned_input = numero_contrato.replace(".", "").replace("-", "").replace("/", "").replace(" ", "").upper()
+
+        cleaned_input = (
+            numero_contrato.replace(".", "")
+            .replace("-", "")
+            .replace("/", "")
+            .replace(" ", "")
+            .upper()
+        )
         if cleaned_input.startswith("ICJ"):
             cleaned_input = cleaned_input[3:]
-        
-        db_cleaned = func.replace(func.replace(func.replace(func.replace(
-            ReconhecimentoEstratificacaoDB.numero_contrato, '.', ''
-        ), '-', ''), ' ', ''), 'ICJ', '')
+
+        db_cleaned = func.replace(
+            func.replace(
+                func.replace(
+                    func.replace(
+                        ReconhecimentoEstratificacaoDB.numero_contrato, ".", ""
+                    ),
+                    "-",
+                    "",
+                ),
+                " ",
+                "",
+            ),
+            "ICJ",
+            "",
+        )
         query = query.filter(db_cleaned.ilike(f"%{cleaned_input}%"))
 
     results = query.order_by(ReconhecimentoEstratificacaoDB.data_insercao.desc()).all()
@@ -316,17 +426,24 @@ async def listar_estratificacoes(
     "/reconhecimento-estratificacao/{id}",
     response_model=ReconhecimentoEstratificacaoFullResponse,
     summary="Obter Detalhes de uma Estratificação Específica",
+    tags=["Consultas Específicas"],
 )
 async def obter_estratificacao(
-    id: int = Path(..., description="ID numérico único da estratificação de páginas salva no banco de dados.", examples=[1]),
-    db: Session = Depends(get_db)
+    id: int = Path(
+        ...,
+        description="ID numérico único da estratificação de páginas salva no banco de dados.",
+        examples=[1],
+    ),
+    db: Session = Depends(get_db),
 ):
     """
     Retorna os detalhes completos de uma estratificação de páginas por ID.
     """
     logger.info(f"Endpoint GET /reconhecimento-estratificacao/{id} chamado.")
     db_entry = (
-        db.query(ReconhecimentoEstratificacaoDB).filter(ReconhecimentoEstratificacaoDB.id == id).first()
+        db.query(ReconhecimentoEstratificacaoDB)
+        .filter(ReconhecimentoEstratificacaoDB.id == id)
+        .first()
     )
     if not db_entry:
         raise HTTPException(
@@ -340,19 +457,20 @@ async def obter_estratificacao(
     "/ingestao-metadados",
     response_model=List[IngestaoMetadadosResponse],
     summary="Listar Metadados Cadastrais Persistidos",
+    tags=["Consultas Gerais"],
 )
 async def listar_metadados(
     numero_contrato: str | None = Query(
         None,
         description="Filtro por Número de Contrato. Requer exatamente 14 dígitos numéricos (com ou sem pontuação).",
-        examples=["59000132964252"]
+        examples=["59000132964252"],
     ),
     contratada: str | None = Query(
         None,
         description="Filtro parcial por Razão Social da Empresa Contratada.",
-        examples=["Petro"]
+        examples=["Petro"],
     ),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """
     Retorna uma lista de todos os registros de metadados de contratos persistidos.
@@ -366,16 +484,30 @@ async def listar_metadados(
         if len(digits_only) != 14:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Número de contrato inválido ({numero_contrato}). O número de contrato deve conter exatamente 14 dígitos numéricos (ex: 5900.0132964.25.2)."
+                detail=f"Número de contrato inválido ({numero_contrato}). O número de contrato deve conter exatamente 14 dígitos numéricos (ex: 5900.0132964.25.2).",
             )
-            
-        cleaned_input = numero_contrato.replace(".", "").replace("-", "").replace("/", "").replace(" ", "").upper()
+
+        cleaned_input = (
+            numero_contrato.replace(".", "")
+            .replace("-", "")
+            .replace("/", "")
+            .replace(" ", "")
+            .upper()
+        )
         if cleaned_input.startswith("ICJ"):
             cleaned_input = cleaned_input[3:]
-        
-        db_cleaned = func.replace(func.replace(func.replace(func.replace(
-            IngestaoMetadadosDB.numero_contrato, '.', ''
-        ), '-', ''), ' ', ''), 'ICJ', '')
+
+        db_cleaned = func.replace(
+            func.replace(
+                func.replace(
+                    func.replace(IngestaoMetadadosDB.numero_contrato, ".", ""), "-", ""
+                ),
+                " ",
+                "",
+            ),
+            "ICJ",
+            "",
+        )
         query = query.filter(db_cleaned.ilike(f"%{cleaned_input}%"))
     if contratada:
         query = query.filter(IngestaoMetadadosDB.contratada.ilike(f"%{contratada}%"))
@@ -388,10 +520,15 @@ async def listar_metadados(
     "/ingestao-metadados/{id}",
     response_model=IngestaoMetadadosResponse,
     summary="Obter Detalhes de um Registro de Metadados Específico",
+    tags=["Consultas Específicas"],
 )
 async def obter_metadados(
-    id: int = Path(..., description="ID numérico único do registro de metadados salvo no banco de dados.", examples=[1]),
-    db: Session = Depends(get_db)
+    id: int = Path(
+        ...,
+        description="ID numérico único do registro de metadados salvo no banco de dados.",
+        examples=[1],
+    ),
+    db: Session = Depends(get_db),
 ):
     """
     Retorna os detalhes completos de um registro de metadados cadastrais específicos por ID.
@@ -408,24 +545,28 @@ async def obter_metadados(
 
 
 # --- 2.3 ANÁLISE CONTRATUAL ---
-@router.get("/analises", summary="Listar Análises Contratuais Persistidas")
+@router.get(
+    "/analises",
+    summary="Listar Análises Contratuais Persistidas",
+    tags=["Consultas Gerais"],
+)
 async def listar_analises(
     empresa: str | None = Query(
         None,
         description="Filtro parcial por Nome ou Razão Social da Empresa Contratada.",
-        examples=["Petróleo"]
+        examples=["Petróleo"],
     ),
     cnpj: str | None = Query(
         None,
         description="Filtro por CNPJ da Contratada. Requer exatamente 14 dígitos numéricos (com ou sem pontuação).",
-        examples=["12345678000199"]
+        examples=["12345678000199"],
     ),
     numero_contrato: str | None = Query(
         None,
         description="Filtro por Número de Contrato. Requer exatamente 14 dígitos numéricos (com ou sem pontuação).",
-        examples=["59000132964252"]
+        examples=["59000132964252"],
     ),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """
     Retorna uma lista de todas as análises de contratos salvas no banco de dados.
@@ -441,13 +582,17 @@ async def listar_analises(
         if len(digits_only_cnpj) != 14:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"CNPJ inválido ({cnpj}). O CNPJ deve conter exatamente 14 dígitos numéricos (ex: 12.345.678/0001-99)."
+                detail=f"CNPJ inválido ({cnpj}). O CNPJ deve conter exatamente 14 dígitos numéricos (ex: 12.345.678/0001-99).",
             )
-            
-        cleaned_cnpj = cnpj.replace(".", "").replace("-", "").replace("/", "").replace(" ", "")
-        db_cleaned_cnpj = func.replace(func.replace(func.replace(
-            AnaliseContratualDB.cnpj, '.', ''
-        ), '-', ''), '/', '')
+
+        cleaned_cnpj = (
+            cnpj.replace(".", "").replace("-", "").replace("/", "").replace(" ", "")
+        )
+        db_cleaned_cnpj = func.replace(
+            func.replace(func.replace(AnaliseContratualDB.cnpj, ".", ""), "-", ""),
+            "/",
+            "",
+        )
         query = query.filter(db_cleaned_cnpj.ilike(f"%{cleaned_cnpj}%"))
     if numero_contrato:
         # Validar quantidade de dígitos
@@ -455,26 +600,48 @@ async def listar_analises(
         if len(digits_only) != 14:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Número de contrato inválido ({numero_contrato}). O número de contrato deve conter exatamente 14 dígitos numéricos (ex: 5900.0132964.25.2)."
+                detail=f"Número de contrato inválido ({numero_contrato}). O número de contrato deve conter exatamente 14 dígitos numéricos (ex: 5900.0132964.25.2).",
             )
-            
-        cleaned_input = numero_contrato.replace(".", "").replace("-", "").replace("/", "").replace(" ", "").upper()
+
+        cleaned_input = (
+            numero_contrato.replace(".", "")
+            .replace("-", "")
+            .replace("/", "")
+            .replace(" ", "")
+            .upper()
+        )
         if cleaned_input.startswith("ICJ"):
             cleaned_input = cleaned_input[3:]
-        
-        db_cleaned = func.replace(func.replace(func.replace(func.replace(
-            AnaliseContratualDB.numero_contrato, '.', ''
-        ), '-', ''), ' ', ''), 'ICJ', '')
+
+        db_cleaned = func.replace(
+            func.replace(
+                func.replace(
+                    func.replace(AnaliseContratualDB.numero_contrato, ".", ""), "-", ""
+                ),
+                " ",
+                "",
+            ),
+            "ICJ",
+            "",
+        )
         query = query.filter(db_cleaned.ilike(f"%{cleaned_input}%"))
 
     results = query.order_by(AnaliseContratualDB.data_insercao.desc()).all()
     return results
 
 
-@router.get("/analises/{id}", summary="Obter Detalhes de uma Análise Específica")
+@router.get(
+    "/analises/{id}",
+    summary="Obter Detalhes de uma Análise Específica",
+    tags=["Consultas Específicas"],
+)
 async def obter_analise(
-    id: int = Path(..., description="ID numérico único da análise contratual salva no banco de dados.", examples=[1]),
-    db: Session = Depends(get_db)
+    id: int = Path(
+        ...,
+        description="ID numérico único da análise contratual salva no banco de dados.",
+        examples=[1],
+    ),
+    db: Session = Depends(get_db),
 ):
     """
     Retorna os detalhes completos (incluindo todas as cláusulas salvas) de uma análise contratual específica por ID.
@@ -494,16 +661,22 @@ async def obter_analise(
 # 3. OPERAÇÕES DE EDICAO / EXCLUSÃO (PATCH / DELETE)
 # ==================================================================
 
+
 @router.patch(
     "/analises/{id}",
     response_model=AnaliseContratualFullResponse,
     summary="Atualizar Parcialmente uma Análise Contratual",
     description="Atualiza apenas os campos enviados de uma análise contratual existente. Campos não enviados permanecem inalterados.",
+    tags=["Alterações de dados"],
 )
 async def atualizar_analise(
-    id: int = Path(..., description="ID numérico único da análise contratual a ser editada.", examples=[1]),
+    id: int = Path(
+        ...,
+        description="ID numérico único da análise contratual a ser editada.",
+        examples=[1],
+    ),
     dados: AnaliseContratualUpdate = None,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
 ):
     """
     Atualiza parcialmente os dados de uma análise contratual.
@@ -541,11 +714,20 @@ async def atualizar_analise(
     "/analises/{id}",
     summary="Excluir Análise Contratual",
     description="Exclui uma análise contratual do banco de dados. É necessário enviar o parâmetro `confirm=true` na query string para confirmar a exclusão.",
+    tags=["Exclusão de registros"],
 )
 async def deletar_analise(
-    id: int = Path(..., description="ID numérico único da análise contratual a ser excluída.", examples=[1]),
-    confirm: bool = Query(False, description="Confirmação da exclusão (requer true para efetuar a ação).", examples=[True]),
-    db: Session = Depends(get_db)
+    id: int = Path(
+        ...,
+        description="ID numérico único da análise contratual a ser excluída.",
+        examples=[1],
+    ),
+    confirm: bool = Query(
+        False,
+        description="Confirmação da exclusão (requer true para efetuar a ação).",
+        examples=[True],
+    ),
+    db: Session = Depends(get_db),
 ):
     """
     Exclui uma análise contratual do banco de dados.
