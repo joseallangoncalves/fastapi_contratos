@@ -31,7 +31,9 @@ from models import (
     AnaliseContratualFullResponse,
     ReconhecimentoEstratificacaoResponse,
     ReconhecimentoEstratificacaoFullResponse,
+    ReconhecimentoEstratificacaoUpdate,
     IngestaoMetadadosResponse,
+    IngestaoMetadadosUpdate,
 )
 
 logger = get_logger()
@@ -77,6 +79,40 @@ def format_estratificacao_db_to_response(
         },
         "data_insercao": db_entry.data_insercao,
     }
+
+
+SECAO_DB_MAP = {
+    "relatorio_assinatura": {
+        "pagina_inicio": "relatorio_assinatura_inicio",
+        "pagina_fim": "relatorio_assinatura_fim",
+        "tipo": "relatorio_assinatura_tipo",
+    },
+    "instrumento_contratual_icj": {
+        "pagina_inicio": "instrumento_contratual_icj_inicio",
+        "pagina_fim": "instrumento_contratual_icj_fim",
+        "tipo": "instrumento_contratual_icj_tipo",
+    },
+    "especificacao_tecnica_memorial": {
+        "pagina_inicio": "especificacao_tecnica_memorial_inicio",
+        "pagina_fim": "especificacao_tecnica_memorial_fim",
+        "tipo": "especificacao_tecnica_memorial_tipo",
+    },
+    "planilha_precos_ppu": {
+        "pagina_inicio": "planilha_precos_ppu_inicio",
+        "pagina_fim": "planilha_precos_ppu_fim",
+        "tipo": "planilha_precos_ppu_tipo",
+    },
+    "anexo_sms": {
+        "pagina_inicio": "anexo_sms_inicio",
+        "pagina_fim": "anexo_sms_fim",
+        "tipo": "anexo_sms_tipo",
+    },
+    "circulares_conformidade": {
+        "pagina_inicio": "circulares_conformidade_inicio",
+        "pagina_fim": "circulares_conformidade_fim",
+        "tipo": "circulares_conformidade_tipo",
+    },
+}
 
 
 # ==================================================================
@@ -708,6 +744,212 @@ async def atualizar_analise(
 
     logger.info(f"Análise contratual ID {id} atualizada com sucesso.")
     return db_entry
+
+
+@router.patch(
+    "/ingestao-metadados/{id}",
+    response_model=IngestaoMetadadosResponse,
+    summary="Atualizar Parcialmente Metadados Cadastrais",
+    description="Atualiza apenas os campos enviados de um registro de metadados existente. Campos não enviados permanecem inalterados.",
+    tags=["Alterações de dados"],
+)
+async def atualizar_metadados(
+    id: int = Path(
+        ...,
+        description="ID numérico único do registro de metadados a ser editado.",
+        examples=[1],
+    ),
+    dados: IngestaoMetadadosUpdate = None,
+    db: Session = Depends(get_db),
+):
+    """
+    Atualiza parcialmente os dados de metadados cadastrais de um contrato.
+    Apenas os campos enviados no body serão alterados; os demais permanecem como estão.
+    """
+    logger.info(f"Endpoint PATCH /ingestao-metadados/{id} chamado.")
+
+    db_entry = (
+        db.query(IngestaoMetadadosDB).filter(IngestaoMetadadosDB.id == id).first()
+    )
+    if not db_entry:
+        raise HTTPException(
+            status_code=404, detail="Registro de metadados não encontrado."
+        )
+
+    update_data = dados.model_dump(exclude_unset=True)
+
+    if not update_data:
+        raise HTTPException(
+            status_code=400,
+            detail="Nenhum campo fornecido para atualização.",
+        )
+
+    for key, value in update_data.items():
+        setattr(db_entry, key, value)
+
+    db.commit()
+    db.refresh(db_entry)
+
+    logger.info(f"Metadados ID {id} atualizados com sucesso.")
+    return db_entry
+
+
+@router.delete(
+    "/ingestao-metadados/{id}",
+    summary="Excluir Metadados Cadastrais",
+    description="Exclui um registro de metadados do banco de dados. É necessário enviar o parâmetro `confirm=true` na query string para confirmar a exclusão.",
+    tags=["Exclusão de registros"],
+)
+async def deletar_metadados(
+    id: int = Path(
+        ...,
+        description="ID numérico único do registro de metadados a ser excluído.",
+        examples=[1],
+    ),
+    confirm: bool = Query(
+        False,
+        description="Confirmação da exclusão (requer true para efetuar a ação).",
+        examples=[True],
+    ),
+    db: Session = Depends(get_db),
+):
+    """
+    Exclui um registro de metadados do banco de dados.
+    A exclusão só é efetuada se o parâmetro `confirm=true` for enviado na query string.
+    """
+    logger.info(f"Endpoint DELETE /ingestao-metadados/{id} chamado.")
+
+    if not confirm:
+        raise HTTPException(
+            status_code=400,
+            detail="Exclusão não confirmada. Envie ?confirm=true para confirmar a exclusão.",
+        )
+
+    db_entry = (
+        db.query(IngestaoMetadadosDB).filter(IngestaoMetadadosDB.id == id).first()
+    )
+    if not db_entry:
+        raise HTTPException(
+            status_code=404, detail="Registro de metadados não encontrado."
+        )
+
+    db.delete(db_entry)
+    db.commit()
+
+    logger.info(f"Metadados ID {id} excluídos com sucesso.")
+    return {"mensagem": f"Metadados ID {id} excluídos com sucesso."}
+
+
+@router.patch(
+    "/reconhecimento-estratificacao/{id}",
+    response_model=ReconhecimentoEstratificacaoFullResponse,
+    summary="Atualizar Parcialmente uma Estratificação de Páginas",
+    description="Atualiza apenas os campos/seções enviados de uma estratificação existente. Aceita objetos SecaoIntervalo parciais para cada seção.",
+    tags=["Alterações de dados"],
+)
+async def atualizar_estratificacao(
+    id: int = Path(
+        ...,
+        description="ID numérico único da estratificação de páginas a ser editada.",
+        examples=[1],
+    ),
+    dados: ReconhecimentoEstratificacaoUpdate = None,
+    db: Session = Depends(get_db),
+):
+    """
+    Atualiza parcialmente os dados de uma estratificação de páginas.
+    Aceita objetos aninhados SecaoIntervalo. Apenas os campos/seções enviados serão alterados.
+    """
+    logger.info(f"Endpoint PATCH /reconhecimento-estratificacao/{id} chamado.")
+
+    db_entry = (
+        db.query(ReconhecimentoEstratificacaoDB)
+        .filter(ReconhecimentoEstratificacaoDB.id == id)
+        .first()
+    )
+    if not db_entry:
+        raise HTTPException(status_code=404, detail="Estratificação não encontrada.")
+
+    raw_data = dados.model_dump(exclude_unset=True)
+
+    if not raw_data:
+        raise HTTPException(
+            status_code=400,
+            detail="Nenhum campo fornecido para atualização.",
+        )
+
+    # Flatten nested SecaoIntervalo objects to flat DB column names
+    update_data: dict[str, Any] = {}
+    for key, value in raw_data.items():
+        if key == "numero_contrato":
+            update_data[key] = value
+        elif key in SECAO_DB_MAP and value is not None:
+            section_data = value if isinstance(value, dict) else {}
+            for sub_key, sub_val in section_data.items():
+                db_col = SECAO_DB_MAP[key].get(sub_key)
+                if db_col:
+                    update_data[db_col] = sub_val
+
+    if not update_data:
+        raise HTTPException(
+            status_code=400,
+            detail="Nenhum campo válido para atualização.",
+        )
+
+    for key, value in update_data.items():
+        setattr(db_entry, key, value)
+
+    db.commit()
+    db.refresh(db_entry)
+
+    logger.info(f"Estratificação ID {id} atualizada com sucesso.")
+    return format_estratificacao_db_to_response(db_entry)
+
+
+@router.delete(
+    "/reconhecimento-estratificacao/{id}",
+    summary="Excluir Estratificação de Páginas",
+    description="Exclui uma estratificação de páginas do banco de dados. É necessário enviar o parâmetro `confirm=true` na query string para confirmar a exclusão.",
+    tags=["Exclusão de registros"],
+)
+async def deletar_estratificacao(
+    id: int = Path(
+        ...,
+        description="ID numérico único da estratificação a ser excluída.",
+        examples=[1],
+    ),
+    confirm: bool = Query(
+        False,
+        description="Confirmação da exclusão (requer true para efetuar a ação).",
+        examples=[True],
+    ),
+    db: Session = Depends(get_db),
+):
+    """
+    Exclui uma estratificação de páginas do banco de dados.
+    A exclusão só é efetuada se o parâmetro `confirm=true` for enviado na query string.
+    """
+    logger.info(f"Endpoint DELETE /reconhecimento-estratificacao/{id} chamado.")
+
+    if not confirm:
+        raise HTTPException(
+            status_code=400,
+            detail="Exclusão não confirmada. Envie ?confirm=true para confirmar a exclusão.",
+        )
+
+    db_entry = (
+        db.query(ReconhecimentoEstratificacaoDB)
+        .filter(ReconhecimentoEstratificacaoDB.id == id)
+        .first()
+    )
+    if not db_entry:
+        raise HTTPException(status_code=404, detail="Estratificação não encontrada.")
+
+    db.delete(db_entry)
+    db.commit()
+
+    logger.info(f"Estratificação ID {id} excluída com sucesso.")
+    return {"mensagem": f"Estratificação ID {id} excluída com sucesso."}
 
 
 @router.delete(
