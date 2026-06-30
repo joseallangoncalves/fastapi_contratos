@@ -31,6 +31,11 @@ fastapi_contratos/
 │   ├── analisador-contratual/SKILL.md
 │   ├── ingestao-metadados/SKILL.md
 │   └── reconhecimento-estratificacao/SKILL.md
+├── contratos-para-teste/          # PDFs para testes
+│   ├── Contrato 2 - Assinado.pdf
+│   ├── Contrato 3 - Assinado.pdf
+│   ├── Contrato 4 - Assinado.pdf
+│   └── Contrato 5 - Assinado.pdf
 ├── specs/                        # Documentos de especificação
 ├── pyproject.toml                # Dependências (uv)
 ├── contratos.db                  # SQLite (criado automaticamente)
@@ -54,19 +59,19 @@ flowchart LR
 
 ## Stack Tecnológico
 
-| Tecnologia | Versão | Propósito |
-|:-----------|:-------|:----------|
-| Python | >= 3.12 | Runtime |
-| FastAPI | >= 0.136 | Framework web REST |
-| SQLAlchemy | >= 2.0 | ORM + migrações |
-| SQLite | - | Banco de dados embarcado |
-| Google Gemini API | 2.5 Flash / 2.0 Flash / 2.5 Pro | LLM para análise contratual |
-| PyMuPDF (fitz) | >= 1.27 | Extração de texto de PDFs |
-| PyJWT | >= 2.13 | Tokens de autenticação |
-| PwdLib (Argon2) | >= 0.3 | Hash de senhas |
-| uv | - | Gerenciador de dependências |
-| FastAPI MCP | >= 0.4 | Exposição via Model Context Protocol |
-| Ruff | >= 0.15 | Linter e formatador |
+| Tecnologia        | Versão                          | Propósito                            |
+| :---------------- | :------------------------------ | :----------------------------------- |
+| Python            | >= 3.12                         | Runtime                              |
+| FastAPI           | >= 0.136                        | Framework web REST                   |
+| SQLAlchemy        | >= 2.0                          | ORM + migrações                      |
+| SQLite            | -                               | Banco de dados embarcado             |
+| Google Gemini API | 2.5 Flash / 2.0 Flash / 2.5 Pro | LLM para análise contratual          |
+| PyMuPDF (fitz)    | >= 1.27                         | Extração de texto de PDFs            |
+| PyJWT             | >= 2.13                         | Tokens de autenticação               |
+| PwdLib (Argon2)   | >= 0.3                          | Hash de senhas                       |
+| uv                | -                               | Gerenciador de dependências          |
+| FastAPI MCP       | >= 0.4                          | Exposição via Model Context Protocol |
+| Ruff              | >= 0.15                         | Linter e formatador                  |
 
 ---
 
@@ -74,49 +79,49 @@ flowchart LR
 
 ### Autenticação
 
-| Método | Rota | Descrição |
-|:-------|:-----|:----------|
-| `POST` | `/api/v1/token` | Gera token JWT (OAuth2 Password Flow) |
-| `GET` | `/api/v1/health` | Health check da API |
+| Método | Rota             | Descrição                             |
+| :----- | :--------------- | :------------------------------------ |
+| `POST` | `/api/v1/token`  | Gera token JWT (OAuth2 Password Flow) |
+| `GET`  | `/api/v1/health` | Health check da API                   |
 
 ### Análise de Contratos (IA) — Criação
 
-| Método | Rota | Descrição |
-|:-------|:-----|:----------|
+| Método | Rota                                              | Descrição                                                                       |
+| :----- | :------------------------------------------------ | :------------------------------------------------------------------------------ |
 | `POST` | `/api/v1/contratos/reconhecimento-estratificacao` | Mapeia intervalos de páginas de cada seção do PDF e extrai o número do contrato |
-| `POST` | `/api/v1/contratos/ingestao-metadados` | Extrai metadados cadastrais (contratante, contratada, objeto, prazos, valor) |
-| `POST` | `/api/v1/contratos/analise-contratual` | Extrai cláusulas de multas, penalidades, sanções e vigência |
+| `POST` | `/api/v1/contratos/ingestao-metadados`            | Extrai metadados cadastrais (contratante, contratada, objeto, prazos, valor)    |
+| `POST` | `/api/v1/contratos/analise-contratual`            | Extrai cláusulas de multas, penalidades, sanções e vigência                     |
 
 ### Consultas Gerais
 
-| Método | Rota | Descrição | Filtros |
-|:-------|:-----|:----------|:--------|
-| `GET` | `/api/v1/contratos/reconhecimento-estratificacao` | Lista estratificações | `numero_contrato` |
-| `GET` | `/api/v1/contratos/ingestao-metadados` | Lista metadados | `numero_contrato`, `contratada` |
-| `GET` | `/api/v1/contratos/analises` | Lista análises contratuais | `empresa`, `cnpj`, `numero_contrato` |
+| Método | Rota                                              | Descrição                  | Filtros                              |
+| :----- | :------------------------------------------------ | :------------------------- | :----------------------------------- |
+| `GET`  | `/api/v1/contratos/reconhecimento-estratificacao` | Lista estratificações      | `numero_contrato`                    |
+| `GET`  | `/api/v1/contratos/ingestao-metadados`            | Lista metadados            | `numero_contrato`, `contratada`      |
+| `GET`  | `/api/v1/contratos/analises`                      | Lista análises contratuais | `empresa`, `cnpj`, `numero_contrato` |
 
 ### Consultas Específicas
 
-| Método | Rota | Descrição |
-|:-------|:-----|:----------|
-| `GET` | `/api/v1/contratos/reconhecimento-estratificacao/{id}` | Detalhes de uma estratificação |
-| `GET` | `/api/v1/contratos/ingestao-metadados/{id}` | Detalhes de metadados |
-| `GET` | `/api/v1/contratos/analises/{id}` | Detalhes de uma análise |
+| Método | Rota                                                   | Descrição                      |
+| :----- | :----------------------------------------------------- | :----------------------------- |
+| `GET`  | `/api/v1/contratos/reconhecimento-estratificacao/{id}` | Detalhes de uma estratificação |
+| `GET`  | `/api/v1/contratos/ingestao-metadados/{id}`            | Detalhes de metadados          |
+| `GET`  | `/api/v1/contratos/analises/{id}`                      | Detalhes de uma análise        |
 
 ### Edição (PATCH)
 
-| Método | Rota | Descrição |
-|:-------|:-----|:----------|
-| `PATCH` | `/api/v1/contratos/analises/{id}` | Atualiza campos de uma análise |
-| `PATCH` | `/api/v1/contratos/ingestao-metadados/{id}` | Atualiza metadados cadastrais |
+| Método  | Rota                                                   | Descrição                         |
+| :------ | :----------------------------------------------------- | :-------------------------------- |
+| `PATCH` | `/api/v1/contratos/analises/{id}`                      | Atualiza campos de uma análise    |
+| `PATCH` | `/api/v1/contratos/ingestao-metadados/{id}`            | Atualiza metadados cadastrais     |
 | `PATCH` | `/api/v1/contratos/reconhecimento-estratificacao/{id}` | Atualiza seções da estratificação |
 
 ### Exclusão (DELETE)
 
-| Método | Rota | Descrição |
-|:-------|:-----|:----------|
-| `DELETE` | `/api/v1/contratos/analises/{id}` | Exclui análise (`?confirm=true`) |
-| `DELETE` | `/api/v1/contratos/ingestao-metadados/{id}` | Exclui metadados (`?confirm=true`) |
+| Método   | Rota                                                   | Descrição                               |
+| :------- | :----------------------------------------------------- | :-------------------------------------- |
+| `DELETE` | `/api/v1/contratos/analises/{id}`                      | Exclui análise (`?confirm=true`)        |
+| `DELETE` | `/api/v1/contratos/ingestao-metadados/{id}`            | Exclui metadados (`?confirm=true`)      |
 | `DELETE` | `/api/v1/contratos/reconhecimento-estratificacao/{id}` | Exclui estratificação (`?confirm=true`) |
 
 > Todos os endpoints `/api/v1/contratos/*` exigem autenticação Bearer JWT.
@@ -139,14 +144,14 @@ sequenceDiagram
     API-->>C: 200 OK (dados protegidos)
 ```
 
-| Campo | Valor |
-|:------|:------|
-| **Token URL** | `POST /api/v1/token` |
-| **Esquema** | OAuth2 Password Bearer |
-| **Algoritmo** | HS256 |
-| **Expiração** | 60 minutos |
-| **Username** | `johndoe` |
-| **Password** | `secret` |
+| Campo         | Valor                  |
+| :------------ | :--------------------- |
+| **Token URL** | `POST /api/v1/token`   |
+| **Esquema**   | OAuth2 Password Bearer |
+| **Algoritmo** | HS256                  |
+| **Expiração** | 60 minutos             |
+| **Username**  | `johndoe`              |
+| **Password**  | `secret`               |
 
 ---
 
@@ -155,53 +160,56 @@ sequenceDiagram
 O banco `contratos.db` é criado automaticamente na inicialização. Três tabelas são gerenciadas pelo SQLAlchemy:
 
 ### `analises_contratuais`
+
 Armazena os resultados da análise de cláusulas de penalidades e vigência.
 
-| Coluna | Tipo | Descrição |
-|:-------|:-----|:----------|
-| `id` | INTEGER (PK) | Identificador único |
-| `empresa` | VARCHAR | Nome da contratada |
-| `cnpj` | VARCHAR | CNPJ (com pontuação) |
-| `data_inicio` | DATE | Início da vigência |
-| `data_fim` | DATE | Término calculado |
-| `vigencia_prazo` | INTEGER | Prazo em dias |
-| `valor_contrato` | VARCHAR | Valor global |
-| `clausula_vigencia` | TEXT | Cláusula literal |
-| `multas_moratorias` | TEXT | Cláusula literal |
-| `multas_compensatorias` | TEXT | Cláusula literal |
-| `sancoes_administrativas` | TEXT | Cláusula literal |
-| `rescisao` | TEXT | Cláusula literal |
-| `numero_contrato` | VARCHAR | Identificador do contrato |
-| `numero_oportunidade` | VARCHAR | Oportunidade Petronect |
-| `data_insercao` | DATETIME | Timestamp de criação |
+| Coluna                    | Tipo         | Descrição                 |
+| :------------------------ | :----------- | :------------------------ |
+| `id`                      | INTEGER (PK) | Identificador único       |
+| `empresa`                 | VARCHAR      | Nome da contratada        |
+| `cnpj`                    | VARCHAR      | CNPJ (com pontuação)      |
+| `data_inicio`             | DATE         | Início da vigência        |
+| `data_fim`                | DATE         | Término calculado         |
+| `vigencia_prazo`          | INTEGER      | Prazo em dias             |
+| `valor_contrato`          | VARCHAR      | Valor global              |
+| `clausula_vigencia`       | TEXT         | Cláusula literal          |
+| `multas_moratorias`       | TEXT         | Cláusula literal          |
+| `multas_compensatorias`   | TEXT         | Cláusula literal          |
+| `sancoes_administrativas` | TEXT         | Cláusula literal          |
+| `rescisao`                | TEXT         | Cláusula literal          |
+| `numero_contrato`         | VARCHAR      | Identificador do contrato |
+| `numero_oportunidade`     | VARCHAR      | Oportunidade Petronect    |
+| `data_insercao`           | DATETIME     | Timestamp de criação      |
 
 ### `ingestao_metadados`
+
 Armazena os metadados cadastrais extraídos do contrato.
 
-| Coluna | Tipo | Descrição |
-|:-------|:-----|:----------|
-| `id` | INTEGER (PK) | Identificador único |
-| `numero_contrato` | VARCHAR | Número do contrato |
-| `numero_oportunidade` | VARCHAR | Oportunidade Petronect |
-| `objeto_contrato` | TEXT | Objeto do contrato |
-| `contratante` | VARCHAR | Entidade contratante |
-| `contratada` | VARCHAR | Empresa contratada |
-| `prazo_vigencia` | INTEGER | Prazo em dias |
-| `prazo_execucao` | INTEGER | Prazo de execução em dias |
-| `valor_total` | VARCHAR | Valor global |
-| `data_insercao` | DATETIME | Timestamp de criação |
+| Coluna                | Tipo         | Descrição                 |
+| :-------------------- | :----------- | :------------------------ |
+| `id`                  | INTEGER (PK) | Identificador único       |
+| `numero_contrato`     | VARCHAR      | Número do contrato        |
+| `numero_oportunidade` | VARCHAR      | Oportunidade Petronect    |
+| `objeto_contrato`     | TEXT         | Objeto do contrato        |
+| `contratante`         | VARCHAR      | Entidade contratante      |
+| `contratada`          | VARCHAR      | Empresa contratada        |
+| `prazo_vigencia`      | INTEGER      | Prazo em dias             |
+| `prazo_execucao`      | INTEGER      | Prazo de execução em dias |
+| `valor_total`         | VARCHAR      | Valor global              |
+| `data_insercao`       | DATETIME     | Timestamp de criação      |
 
 ### `reconhecimento_estratificacao`
+
 Armazena o mapeamento de páginas de cada seção do contrato.
 
-| Coluna | Tipo | Descrição |
-|:-------|:-----|:----------|
-| `id` | INTEGER (PK) | Identificador único |
-| `numero_contrato` | VARCHAR | Número do contrato |
-| `*_inicio` | INTEGER | Página inicial da seção |
-| `*_fim` | INTEGER | Página final da seção |
-| `*_tipo` | VARCHAR | Tipo (Texto/Imagens/Texto + Imagens) |
-| `data_insercao` | DATETIME | Timestamp de criação |
+| Coluna            | Tipo         | Descrição                            |
+| :---------------- | :----------- | :----------------------------------- |
+| `id`              | INTEGER (PK) | Identificador único                  |
+| `numero_contrato` | VARCHAR      | Número do contrato                   |
+| `*_inicio`        | INTEGER      | Página inicial da seção              |
+| `*_fim`           | INTEGER      | Página final da seção                |
+| `*_tipo`          | VARCHAR      | Tipo (Texto/Imagens/Texto + Imagens) |
+| `data_insercao`   | DATETIME     | Timestamp de criação                 |
 
 Seções mapeadas: `relatorio_assinatura`, `instrumento_contratual_icj`, `especificacao_tecnica_memorial`, `planilha_precos_ppu`, `anexo_sms`, `circulares_conformidade`.
 
@@ -233,11 +241,11 @@ flowchart LR
 
 ### Skills disponíveis
 
-| Skill | Arquivo | Endpoint |
-|:------|:--------|:---------|
+| Skill                           | Arquivo                                                 | Endpoint                                 |
+| :------------------------------ | :------------------------------------------------------ | :--------------------------------------- |
 | Reconhecimento e Estratificação | `.agents/skills/reconhecimento-estratificacao/SKILL.md` | `POST .../reconhecimento-estratificacao` |
-| Ingestão de Metadados | `.agents/skills/ingestao-metadados/SKILL.md` | `POST .../ingestao-metadados` |
-| Analisador Contratual | `.agents/skills/analisador-contratual/SKILL.md` | `POST .../analise-contratual` |
+| Ingestão de Metadados           | `.agents/skills/ingestao-metadados/SKILL.md`            | `POST .../ingestao-metadados`            |
+| Analisador Contratual           | `.agents/skills/analisador-contratual/SKILL.md`         | `POST .../analise-contratual`            |
 
 ---
 
@@ -263,18 +271,18 @@ analises = api.listar_analises(empresa="PETROBRAS")
 
 Métodos disponíveis:
 
-| Método | Descrição |
-|:-------|:----------|
-| `login(username, password)` | Autentica e armazena token JWT |
-| `analise_contratual(file_path)` | Envia PDF para análise de penalidades |
-| `reconhecimento_estratificacao(file_path)` | Mapeia seções do PDF |
-| `ingestao_metadados(file_path)` | Extrai metadados cadastrais |
-| `listar_analises(empresa, cnpj)` | Lista análises persistidas |
-| `obter_analise(id_analise)` | Detalhes de uma análise |
-| `listar_estratificacoes(numero_contrato)` | Lista estratificações |
-| `obter_estratificacao(id)` | Detalhes de uma estratificação |
-| `listar_metadados(numero_contrato, contratada)` | Lista metadados |
-| `obter_metadados(id)` | Detalhes de metadados |
+| Método                                          | Descrição                             |
+| :---------------------------------------------- | :------------------------------------ |
+| `login(username, password)`                     | Autentica e armazena token JWT        |
+| `analise_contratual(file_path)`                 | Envia PDF para análise de penalidades |
+| `reconhecimento_estratificacao(file_path)`      | Mapeia seções do PDF                  |
+| `ingestao_metadados(file_path)`                 | Extrai metadados cadastrais           |
+| `listar_analises(empresa, cnpj)`                | Lista análises persistidas            |
+| `obter_analise(id_analise)`                     | Detalhes de uma análise               |
+| `listar_estratificacoes(numero_contrato)`       | Lista estratificações                 |
+| `obter_estratificacao(id)`                      | Detalhes de uma estratificação        |
+| `listar_metadados(numero_contrato, contratada)` | Lista metadados                       |
+| `obter_metadados(id)`                           | Detalhes de metadados                 |
 
 ---
 
@@ -293,13 +301,13 @@ Isso permite que agentes compatíveis com MCP (LangChain, Claude, etc.) consumam
 
 ## Tratamento de Erros
 
-| Status | Quando ocorre |
-|:-------|:--------------|
+| Status  | Quando ocorre                                                                                         |
+| :------ | :---------------------------------------------------------------------------------------------------- |
 | **400** | PDF inválido/corrompido, tamanho > 50 MB, filtro com menos de 14 dígitos, exclusão sem `confirm=true` |
-| **401** | Token JWT ausente, expirado ou inválido |
-| **404** | ID solicitado não encontrado no banco |
-| **422** | Validação de tipos pelo FastAPI/Pydantic (ex: `id` não numérico) |
-| **502** | Falha de comunicação com a API do Gemini (após 3 tentativas com fallback) |
+| **401** | Token JWT ausente, expirado ou inválido                                                               |
+| **404** | ID solicitado não encontrado no banco                                                                 |
+| **422** | Validação de tipos pelo FastAPI/Pydantic (ex: `id` não numérico)                                      |
+| **502** | Falha de comunicação com a API do Gemini (após 3 tentativas com fallback)                             |
 
 ---
 
@@ -356,12 +364,16 @@ O banco SQLite `contratos.db` é criado automaticamente na primeira execução, 
 
 ### Credenciais de teste
 
-| Campo | Valor |
-|:------|:------|
+| Campo    | Valor     |
+| :------- | :-------- |
 | Username | `johndoe` |
-| Password | `secret` |
+| Password | `secret`  |
 
 Clique em **Authorize** no Swagger e informe os dados acima para obter o token JWT.
+
+### Contratos de Teste
+
+A pasta [`contratos-para-teste/`](contratos-para-teste/) contém 4 contratos em PDF para testar os endpoints de análise sem precisar buscar documentos externos.
 
 ---
 
@@ -415,11 +427,11 @@ Distribuído sob licença Apache 2.0.
 
 ## Contato
 
-| Nome | Papel |
-|:-----|:------|
-| José Allan | allan@ufg.br |
-| Elson | |
-| PH | |
-| Geiziane | |
+| Nome                | Papel                                                     |
+| :------------------ | :-------------------------------------------------------- |
+| José Allan          | joseallan@ufg.br / joseallan@gmail.com                    |
+| Elson               | elson_manoel@yahoo.com.br / elson.andrade@discente.ufg.br |
+| Paulo Henrique (PH) | phenriquiu@gmail.com / ferreira.henrique@discente.ufg.br  |
+| Geiziane            | geizianeoliveira@discente.ufg.br                          |
 
 Repositório: https://github.com/joseallangoncalves/fastapi_contratos
